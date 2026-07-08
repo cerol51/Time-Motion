@@ -1,0 +1,1698 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Operasyonel Mükemmellik & İş Gücü Analiz Paneli</title>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <style>
+        :root {
+            --primary: #0f172a;
+            --primary-light: #1e293b;
+            --accent: #1e3a8a;
+            --accent-light: #3b82f6;
+            --accent-hover: #172554;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --text: #0f172a;
+            --text-muted: #64748b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 1.25rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+
+        .brand h1 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            letter-spacing: -0.025em;
+        }
+
+        .brand p {
+            font-size: 0.85rem;
+            color: #cbd5e1;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        /* TAB KONTROLLERİ */
+        .tab-menu {
+            display: flex;
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 0 2rem;
+            gap: 1rem;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 1rem 1.5rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab-btn:hover {
+            color: var(--primary);
+        }
+
+        .tab-btn.active {
+            color: var(--accent-light);
+            border-bottom-color: var(--accent-light);
+        }
+
+        .container {
+            display: none; /* Varsayılan olarak gizli */
+            flex: 1;
+            padding: 2rem;
+            max-width: 1800px;
+            margin: 0 auto;
+            width: 100%;
+            gap: 2rem;
+        }
+
+        .container.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .card-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--bg);
+            color: var(--primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 0.4rem;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.6rem 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            color: var(--text);
+            background-color: var(--bg);
+            transition: border-color 0.2s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--accent-light);
+            background-color: #fff;
+        }
+
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .kpi-box {
+            background: var(--card-bg);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            padding: 1.25rem;
+            border-left: 4px solid var(--accent);
+        }
+
+        .kpi-box.success { border-left-color: var(--success); }
+        .kpi-box.warning { border-left-color: var(--warning); }
+        .kpi-box.danger { border-left-color: var(--danger); }
+
+        .kpi-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+
+        .kpi-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-top: 0.25rem;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.85rem;
+        }
+
+        th {
+            background-color: var(--bg);
+            color: var(--text-muted);
+            font-weight: 600;
+            padding: 0.75rem 1rem;
+            border-bottom: 2px solid var(--border);
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        td {
+            padding: 0.2rem 0.4rem;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
+        tr:hover td {
+            background-color: #f8fafc;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.6rem 1.2rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            gap: 0.5rem;
+        }
+
+        .btn-primary { background-color: var(--accent); color: white; }
+        .btn-primary:hover { background-color: var(--accent-hover); }
+        
+        .btn-secondary { background-color: #e2e8f0; color: var(--primary); }
+        .btn-secondary:hover { background-color: #cbd5e1; }
+
+        .btn-danger { background-color: var(--danger); color: white; padding: 0.4rem 0.8rem; font-size: 0.8rem; }
+        .btn-danger:hover { background-color: #dc2626; }
+        .btn-sm { padding: 0.4rem 0.75rem; font-size: 0.85rem; }
+
+        .badge {
+            display: inline-block;
+            padding: 0.2rem 0.4rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border-radius: 4px;
+            background: #f1f5f9;
+            color: var(--text);
+        }
+
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 8px;
+            padding: 16px;
+            position: fixed;
+            z-index: 9999;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            font-size: 14px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+
+        #toast.show {
+            visibility: visible;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+
+        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+
+        /* Dashboard Gridleri */
+        .dash-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+
+        .select2-container .select2-selection--single {
+            height: 34px !important;
+            padding: 2px !important;
+            border: 1px solid var(--border) !important;
+            border-radius: 6px !important;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 32px !important;
+        }
+
+    
+        /* MODERN COMPACT SETTINGS */
+        .settings-container {
+            display: grid;
+            grid-template-columns: 2fr 1.2fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .settings-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            padding: 1rem 1.2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            position: relative;
+            overflow: hidden;
+        }
+        .settings-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 4px; height: 100%;
+            background: var(--accent);
+        }
+        .settings-card.success-border::before { background: var(--success); }
+        
+        .settings-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 0.6rem 0.8rem;
+        }
+        .sg-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+        .sg-group label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin: 0;
+        }
+        .sg-input {
+            padding: 0.3rem 0.5rem;
+            font-size: 0.85rem;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            background: #f8fafc;
+            height: 28px;
+        }
+        .sg-input:focus {
+            background: #fff;
+            border-color: var(--accent-light);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+        }
+
+        /* MODERN DASHBOARD KPI */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+        .kpi-modern {
+            background: #fff;
+            border-radius: 16px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 4px 15px -3px rgba(0,0,0,0.05), 0 2px 4px -2px rgba(0,0,0,0.02);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .kpi-modern:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px -3px rgba(0,0,0,0.1);
+        }
+        .kpi-icon-bg {
+            position: absolute;
+            right: -10px;
+            bottom: -15px;
+            font-size: 6rem;
+            opacity: 0.04;
+            transform: rotate(-15deg);
+        }
+        .kpi-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .kpi-val {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-top: 0.5rem;
+            line-height: 1;
+        }
+        .kpi-sub {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin-top: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .kpi-accent { color: var(--accent); }
+        .kpi-warning { color: var(--warning); }
+        .kpi-success { color: var(--success); }
+        
+        .hero-card {
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+            border-radius: 16px;
+            padding: 2rem 2.5rem;
+            color: white;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 10px 20px -5px rgba(30, 58, 138, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+        .hero-left h2 { font-size: 2rem; font-weight: 800; margin-bottom: 0.3rem; letter-spacing: -0.02em; }
+        .hero-left p { font-size: 1rem; color: #bae6fd; font-weight: 500; }
+        
+        .hero-stats {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+        .hero-stat-item {
+            text-align: center;
+            background: rgba(255,255,255,0.1);
+            padding: 0.8rem 1.5rem;
+            border-radius: 12px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .hero-stat-label { font-size: 0.75rem; color: #cbd5e1; text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em; margin-bottom: 0.3rem;}
+        .hero-stat-val { font-size: 1.4rem; font-weight: 800; color: #fff;}
+
+        /* Modern Progress Bars */
+        .progress-bg {
+            background: #e2e8f0;
+            height: 8px;
+            border-radius: 4px;
+            width: 100%;
+            overflow: hidden;
+            margin-top: 0.4rem;
+        }
+        .progress-bar {
+            height: 100%;
+            border-radius: 4px;
+            background: var(--accent);
+            transition: width 0.5s ease;
+        }
+        .pb-1 { background: #3b82f6; }
+        .pb-2 { background: #8b5cf6; }
+        .pb-3 { background: #10b981; }
+        
+        .modern-table th { background: transparent; border-bottom: 2px solid var(--border); color: var(--primary); font-weight: 700; padding: 1rem 0.5rem; }
+        .modern-table td { padding: 1rem 0.5rem; border-bottom: 1px solid #f1f5f9; }
+        .modern-table tr:hover td { background: #f8fafc; }
+
+</style>
+</head>
+<body>
+
+    <header>
+        <div class="brand">
+            <h1>Operasyonel Performans ve Mükemmellik Modülü</h1>
+            <p>Time & Motion İş Gücü Analizi Tablosu</p>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-secondary btn-sm" onclick="undo()" id="btnUndo" disabled>↩ Geri Al</button>
+            <button class="btn btn-secondary btn-sm" onclick="redo()" id="btnRedo" disabled>↪ İleri</button>
+            <span style="border-left:1px solid #334155; margin:0 0.5rem;"></span>
+            <button class="btn btn-secondary btn-sm" onclick="exportData()">⬇ JSON İndir</button>
+            <button class="btn btn-secondary btn-sm" onclick="document.getElementById('importFile').click()">⬆ Veri Yükle (JSON/Excel)</button>
+            <button class="btn btn-danger btn-sm" onclick="clearAllData()">🗑️ Projeyi Sıfırla</button>
+            <input type="file" id="importFile" style="display:none;" onchange="importData(event)" accept=".json, .xlsx, .csv">
+        </div>
+    </header>
+
+    <div class="tab-menu">
+        <button class="tab-btn active" onclick="switchTab('dashboard')">📊 Yönetim Panosu (Özet)</button>
+        <button class="tab-btn" onclick="switchTab('dataEntry')">✍️ Veri Giriş Matrisi</button>
+        <button class="tab-btn" onclick="switchTab('normDb')">⚙️ Norm Veritabanı</button>
+    </div>
+
+    <div id="dataEntry" class="container">
+        
+        <!-- ÜST KISIM: Ayarlar ve İdari Kadro (KOMPAKT) -->
+        <div class="settings-container">
+            <div class="settings-card">
+                <div class="settings-title">⚙️ Proje & Temel Hesaplama Ayarları</div>
+                <div class="settings-grid">
+                    <div class="sg-group"><label>Proje / Tesis Adı</label><input type="text" id="projectName" value="Yeni Tesis Projesi" class="sg-input" onchange="updateAllMetrics()"></div>
+                    <div class="sg-group"><label>Sektör</label><select id="projectSector" onchange="changeSector()" class="sg-input"></select></div>
+                    <div class="sg-group"><label>Tesis Gün</label><input type="number" id="facilityDays" value="30" onchange="updateAllMetrics()" class="sg-input"></div>
+                    <div class="sg-group"><label>Pers. Gün</label><input type="number" id="staffDays" value="26" onchange="updateAllMetrics()" class="sg-input"></div>
+                    <div class="sg-group"><label>Var. Saati</label><input type="number" id="dailyHours" value="7.5" step="0.5" onchange="updateAllMetrics()" class="sg-input"></div>
+                    <div class="sg-group"><label>Yedek (%)</label><input type="number" id="reliefBuffer" value="16.67" step="0.01" onchange="updateAllMetrics()" class="sg-input"></div>
+                    <div class="sg-group"><label>Performans (%)</label><input type="number" id="performanceRate" value="100" step="1" onchange="updateAllMetrics()" class="sg-input"></div>
+                </div>
+            </div>
+
+            <div class="settings-card success-border">
+                <div class="settings-title">👥 İdari & Sabit Kadro (Manuel Eklemeler)</div>
+                <div class="settings-grid" style="grid-template-columns: repeat(2, 1fr);">
+                    <div class="sg-group"><label>Müdür / Yönetici</label><input type="number" id="managerStaff" value="0" min="0" step="1" onchange="updateAllMetrics()" class="sg-input" style="font-weight:bold; color:var(--success);"></div>
+                    <div class="sg-group"><label>Şef / Süpervizör</label><input type="number" id="chiefStaff" value="0" min="0" step="1" onchange="updateAllMetrics()" class="sg-input" style="font-weight:bold; color:var(--success);"></div>
+                    <div class="sg-group"><label>Makineci Personel</label><input type="number" id="machineStaff" value="0" min="0" step="1" onchange="updateAllMetrics()" class="sg-input" style="font-weight:bold; color:var(--success);"></div>
+                    <div class="sg-group"><label>Camcı Personel</label><input type="number" id="glassStaff" value="0" min="0" step="1" onchange="updateAllMetrics()" class="sg-input" style="font-weight:bold; color:var(--success);"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            
+
+            <div class="card" style="padding:0; overflow:hidden;">
+                <div class="card-title" style="padding:1.5rem; margin-bottom:0; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; background:#f8fafc;">
+                    <span>Saha Veri Girişi & İş Kalemleri (Alan / Kat Dağılımı)</span>
+                    <button class="btn btn-primary btn-sm" onclick="addNewAreaRow()">+ Yeni Alan / Görev Ekle</button>
+                </div>
+                <div class="table-container" style="max-height: 600px; overflow-y:auto; overflow-x:auto; padding:0.5rem;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 80px; padding: 0.4rem;">İş Tipi</th>
+                                <th style="width: 90px; padding: 0.4rem;">Kat/Zon</th>
+                                <th style="width: 120px; padding: 0.4rem;">Mahal Adı</th>
+                                <th style="width: 180px; padding: 0.4rem;">Oda Kodu / Metot</th>
+                                <th style="width: 50px; padding: 0.4rem;" title="Adet">Adet</th>
+                                <th style="width: 65px; padding: 0.4rem;" title="Birim Metraj">m²</th>
+                                <th style="width: 45px; padding: 0.4rem;" title="1. Vardiya Frekansı">1.Var</th>
+                                <th style="width: 45px; padding: 0.4rem;" title="2. Vardiya Frekansı">2.Var</th>
+                                <th style="width: 45px; padding: 0.4rem;" title="3. Vardiya Frekansı">3.Var</th>
+                                <th style="width: 50px; padding: 0.4rem;" title="Aylık Tekrar">A/Frek</th>
+                                <th style="width: 60px; text-align:right; padding: 0.4rem;" title="Seçilen metot birim dakikası">Norm</th>
+                                <th style="width: 60px; text-align:right; padding: 0.4rem;" title="Bu satırın oluşturduğu aylık efor">Efor</th>
+                                <th style="width: 60px; text-align:right; padding: 0.4rem;" title="Norm Kadro İhtiyacı">Kadro</th>
+                                <th style="width: 60px; text-align:center; padding: 0.4rem;">İşlem</th>
+                            </tr>
+                        
+                            <tr id="filterRow" style="background:#f1f5f9;">
+                                <th style="padding: 0.2rem;"><input type="text" id="fltType" onkeyup="filterDataEntry()" placeholder="Ara..." class="tbl-input" style="font-size:0.7rem; padding:0.2rem;"></th>
+                                <th style="padding: 0.2rem;"><input type="text" id="fltZone" onkeyup="filterDataEntry()" placeholder="Ara..." class="tbl-input" style="font-size:0.7rem; padding:0.2rem;"></th>
+                                <th style="padding: 0.2rem;"><input type="text" id="fltDesc" onkeyup="filterDataEntry()" placeholder="Ara..." class="tbl-input" style="font-size:0.7rem; padding:0.2rem;"></th>
+                                <th style="padding: 0.2rem;"><input type="text" id="fltCode" onkeyup="filterDataEntry()" placeholder="Ara..." class="tbl-input" style="font-size:0.7rem; padding:0.2rem;"></th>
+                                <th colspan="10" style="padding: 0.2rem;"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="areaTableBody">
+                            <!-- JS ile dolacak -->
+                        </tbody>
+                        <tfoot id="filterTotalRow" style="position: sticky; bottom: -1px; background: #e2e8f0; font-weight: bold; box-shadow: 0 -2px 5px rgba(0,0,0,0.1); z-index: 15;">
+                            <tr>
+                                <td colspan="4" style="text-align: right; padding: 0.5rem; color: var(--primary);">Görüntülenen Alt Toplam:</td>
+                                <td id="subtotQty" style="padding: 0.5rem; text-align: center; color: var(--primary);">0</td>
+                                <td id="subtotArea" style="padding: 0.5rem; text-align: right; color: var(--primary);">0 m²</td>
+                                <td colspan="4"></td>
+                                <td id="subtotHours" style="text-align:right; padding: 0.5rem; color: var(--text-muted);">0.0</td>
+                                <td id="subtotStaff" style="text-align:right; padding: 0.5rem; color: var(--accent);">0.00</td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="dashboard" class="container active">
+        <!-- Hero Profile Card -->
+        <div class="hero-card">
+            <div class="hero-left">
+                <h2 id="dashProjName">Yeni Tesis Projesi</h2>
+                <p id="dashSector">Avm/Mağaza</p>
+            </div>
+            
+        </div>
+
+        <!-- Modern KPIs -->
+        <div class="kpi-grid">
+            <div class="kpi-modern" style="border-bottom: 4px solid #94a3b8;">
+                <div class="kpi-icon-bg">📐</div>
+                <div class="kpi-title">Toplam Tesis Alanı</div>
+                <div>
+                    <div class="kpi-val" id="kpiTotalArea">0</div>
+                    <div class="kpi-sub">Fiziksel zemin ölçüsü (m²)</div>
+                </div>
+            </div>
+            <div class="kpi-modern" style="border-bottom: 4px solid var(--warning);">
+                <div class="kpi-icon-bg">⏱️</div>
+                <div class="kpi-title">Aylık Toplam Efor</div>
+                <div>
+                    <div class="kpi-val kpi-warning" id="kpiTotalHours">0</div>
+                    <div class="kpi-sub">Planlanan tüm işlerin süresi (Saat)</div>
+                </div>
+            </div>
+            <div class="kpi-modern" style="border-bottom: 4px solid var(--accent-light);">
+                <div class="kpi-icon-bg">👥</div>
+                <div class="kpi-title">Yalın Kadro</div>
+                <div>
+                    <div class="kpi-val kpi-accent" id="kpiBaseNorm">0.00</div>
+                    <div class="kpi-sub">İzinler hariç net ihtiyaç</div>
+                </div>
+            </div>
+            <div class="kpi-modern" style="border-bottom: 4px solid #8b5cf6;">
+                <div class="kpi-icon-bg" style="color:#8b5cf6; opacity:0.1;">🏖️</div>
+                <div class="kpi-title">İzin Doldurucu</div>
+                <div>
+                    <div class="kpi-val" id="kpiReliefStaff" style="color:#8b5cf6;">0.00</div>
+                    <div class="kpi-sub">Hafta tatili ve izin karşılığı</div>
+                </div>
+            </div>
+            <div class="kpi-modern" style="border-bottom: 4px solid var(--success); background: #f0fdf4;">
+                <div class="kpi-icon-bg" style="color:#166534; opacity:0.1;">👑</div>
+                <div class="kpi-title" style="color:#166534;">Genel Toplam Kadro</div>
+                <div>
+                    <div class="kpi-val kpi-success" id="kpiGrandTotal" style="font-size: 3rem;">0.00</div>
+                    <div class="kpi-sub" style="color:#15803d;">Yedek ve İdari personeller dahil Headcount</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dash-grid">
+            <div class="card">
+                <div class="card-title">İş Tipi (Rutin / Proje) Efor Dağılımı</div>
+                <table class="modern-table" style="width:100%; margin-bottom:1rem;">
+                    <thead>
+                        <tr>
+                            <th style="text-align:left;">İş Sınıfı</th>
+                            <th style="text-align:right;">Alan (m²)</th>
+                            <th style="text-align:right;">Efor (Saat)</th>
+                            <th style="text-align:right;">Kadro</th>
+                        </tr>
+                    </thead>
+                    <tbody id="summaryTableBody">
+                        <!-- JS -->
+                    </tbody>
+                </table>
+                <div class="chart-container" style="height:220px; margin-top:2rem;">
+                    <canvas id="typeChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Vardiya İhtiyaç Dağılımı & Analizi</div>
+                <table class="modern-table" style="width:100%; margin-bottom:1rem;">
+                    <thead>
+                        <tr>
+                            <th style="text-align:left; width:120px;">Vardiya</th>
+                            <th style="text-align:left;">İş Yükü Dağılımı</th>
+                            <th style="text-align:right; width:80px;">Kadro</th>
+                        </tr>
+                    </thead>
+                    <tbody id="shiftTableBody">
+                        <!-- JS -->
+                    </tbody>
+                </table>
+                <div class="chart-container" style="height:220px; margin-top:2rem; display:flex; justify-content:center;">
+                    <canvas id="shiftChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div><div id="normDb" class="container">
+        <div class="card" style="background: #f8fafc; border-left: 4px solid var(--accent);">
+            <div class="card-title" style="border:none; margin-bottom:0.5rem;">⚙️ Master Veri Filtreleme (Norm Ayarları)</div>
+            <div class="form-row">
+                <div class="form-group" style="max-width:300px;">
+                    <label>Listelenecek Kategori / Sektör</label>
+                    <select id="dbSectorFilter" onchange="renderNormTable()" class="tbl-input">
+                        </select>
+                </div>
+                <div class="form-group" style="margin-top:1.5rem; display:flex; gap:0.5rem;">
+                    <button class="btn btn-primary btn-sm" onclick="addNewNormCode()">+ Yeni Kod Ekle</button>
+                    <button class="btn btn-secondary btn-sm" onclick="resetDefaultNorms()">🔄 Varsayılan Normlara Dön</button>
+                </div>
+            </div>
+            <p style="font-size:0.8rem; color:var(--text-muted);">Değişiklik yaptığınız norm değerleri otomatik olarak tüm tablo ve efor hesaplamalarına yansır.</p>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 150px;">Kategori</th>
+                        <th style="width: 100px;">Kod</th>
+                        <th>Açıklama (Alan / Metot)</th>
+                        <th style="width: 150px; text-align:right;">Zaman Normu (dk)</th>
+                    </tr>
+                </thead>
+                <tbody id="normTableBody">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="toast"></div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+    <script>
+        // Mükemmel Temizlenmiş ve Eksiksiz Gömülü Veri Tabanı
+        const originalDailyNorms = {"Hastane": {"BREA": {"name": "Ortak Alan", "val": 0.18591}, "FITN": {"name": "Fitness Salonu", "val": 0.18591}, "GUAR": {"name": "Gözlem Odası", "val": 0.19232}, "OFFD": {"name": "Ofis", "val": 0.11154}, "TOIC": {"name": "Tuvalet", "val": 0.46477}, "WORK": {"name": "Çalışma atölyesi", "val": 0.11267}, "NURS": {"name": "Hemşire Odası", "val": 0.37182}, "XRSL": {"name": "X-Ray Koruma", "val": 0.24249}, "CARP": {"name": "Ahşapla çalışma odası", "val": 0.18716}, "CLAS": {"name": "Sınıf ve wc+lavabo", "val": 0.21786}, "TOIR": {"name": "Tuvalet", "val": 0.55772}, "COOL": {"name": "Soğuk Hava Alanı", "val": 0.61969}, "FRUI": {"name": "Meyve/Sebze Bölümü", "val": 0.18591}, "STOR": {"name": "Mağaza makine temizlik alanı", "val": 0.09295}, "COMB": {"name": "Küçük itmeli - saatlik perf. 700 m2", "val": 0.08605}, "COMC": {"name": "Orta itmeli - saatlik perf. 1400 m2", "val": 0.03984}, "COMD": {"name": "Büyük itmeli - saatlik perf. 1600 m2", "val": 0.03486}, "COMH": {"name": "Büyük Binicili - saatlik perf. 5000 m2", "val": 0.01179}, "ARC": {"name": "Arşiv", "val": 0.09295}, "AUDS": {"name": "Konferans Salonu", "val": 0.30147}, "CLP": {"name": "Temizlik Odası", "val": 0.13943}, "COM": {"name": "Server Odası", "val": 0.15935}, "ELEV": {"name": "Asansör", "val": 1.11545}, "LOCK": {"name": "Soyunma Odası", "val": 0.17539}, "N-S": {"name": "Belirtilmemiş", "val": 1e-05}, "OFAD": {"name": "Açık Ofis", "val": 0.16901}, "CLIN": {"name": "Klinik", "val": 0.17161}, "WAR2": {"name": "Hasta Odası Çift Yataklı", "val": 0.3187}, "WAR4": {"name": "Hasta Odası 4 Yataklı", "val": 0.29354}, "WAR2A": {"name": "Hasta Odası Çift Yataklı", "val": 0.40956}, "WAR4A": {"name": "Hasta Odası 4 Yataklı", "val": 0.37736}, "XRAY": {"name": "X-Ray (Röntgen vs alanlar)", "val": 0.17991}, "CLA": {"name": "Sınıf", "val": 0.20281}, "SCHK": {"name": "Deney/Lab Sınıfı", "val": 0.17429}, "CHEC": {"name": "Çıkış alanı", "val": 0.37182}, "FISH": {"name": "Balık Bölümü", "val": 0.37182}, "FRES": {"name": "Taze Gıda Bölümü", "val": 0.39837}, "STOM": {"name": "Mağaza mop alanları", "val": 0.13943}, "COMF": {"name": "Küçük Binicili - saatlik perf. 2500 m2", "val": 0.02677}, "OFFC": {"name": "Ofis", "val": 0.12676}, "SORT": {"name": "Elleçleme Odası", "val": 0.17429}, "DEMO": {"name": "Numune Odası", "val": 0.17429}, "MED": {"name": "İlaç Odası (Hazırlama)", "val": 0.17429}, "TRE": {"name": "Tedavi Odası", "val": 0.17991}, "WAR1": {"name": "Hasta Odası Tek Yataklı", "val": 0.34858}, "MEAT": {"name": "Kasap Bölümü", "val": 0.46477}, "COR": {"name": "Koridor", "val": 0.1014}, "KITF": {"name": "Mutfak", "val": 0.36216}, "OVER": {"name": "Gece Ofis", "val": 0.23239}, "BATS": {"name": "Banyo", "val": 0.42902}, "DES": {"name": "Dezenfeksiyon Alanı", "val": 0.46477}, "ISOS": {"name": "Kanallı İzole Oda", "val": 0.37182}, "RINS": {"name": "Kanal Temizliği", "val": 0.22309}, "WAR1A": {"name": "Hasta Odası Tek Yataklı", "val": 0.44776}, "COMA": {"name": "Küçük itmeli - saatlik perf. 600 m2", "val": 0.09295}, "COMG": {"name": "Orta Binicili - saatlik perf. 3500 m2", "val": 0.01593}, "KITE": {"name": "Küçük Mutfak", "val": 0.27886}, "BIRT": {"name": "Doğum Odası", "val": 0.22309}, "GRA": {"name": "Muayene Odası", "val": 0.18591}, "INFA": {"name": "Bebek Odası", "val": 0.21451}, "CONF": {"name": "Odak/İletişim Odası", "val": 0.13943}, "CORA": {"name": "Koridor", "val": 0.0858}, "LOUN": {"name": "Bekleme Salonu", "val": 0.22309}, "OFFA": {"name": "Ofis", "val": 0.18591}, "OFAN": {"name": "Açık Ofis", "val": 0.14301}, "PRI": {"name": "Yazıcı Odası", "val": 0.1765}, "REC": {"name": "Resepsiyon", "val": 0.14677}, "STCA": {"name": "Merdiven", "val": 0.18286}, "MONI": {"name": "İzleme Odası", "val": 0.22309}, "WASH": {"name": "Bulaşıkhane", "val": 0.35982}, "GRRO": {"name": "Çocuk Grup Odası", "val": 0.25351}, "GYM": {"name": "Spor/Fitness Salonu", "val": 0.06129}, "PLAY": {"name": "Oyun Odası", "val": 0.27886}, "READ": {"name": "Okuma Odası", "val": 0.19919}, "SPOS": {"name": "Spor Salonu", "val": 0.03187}, "STAF": {"name": "Çalışan Odası", "val": 0.18591}, "BAK": {"name": "Fırın", "val": 0.25351}, "COMI": {"name": "Büyük Binicili - saatlik perf. 5000 m2 üzeri", "val": 0.00885}, "MEET": {"name": "Toplantı Odası", "val": 0.18286}, "SHOW": {"name": "Duş", "val": 0.33801}, "STOS": {"name": "Depo", "val": 0.07243}, "BATH": {"name": "Oda İçinde Banyo", "val": 0.68855}, "LUNL": {"name": "Yemek Salonu", "val": 0.18591}, "SMO": {"name": "Sigara odası", "val": 0.19919}, "SAUN": {"name": "Sauna", "val": 0.92308}, "LAX": {"name": "Dinlenme Odası", "val": 0.58708}, "SUR": {"name": "Ameliyathane", "val": 1.2}, "AUDL": {"name": "Konferans Salonu", "val": 0.20656}, "CORB": {"name": "Koridor", "val": 0.06561}, "LABW": {"name": "Laboratuvar Çalışma alanı", "val": 0.30985}, "LIBR": {"name": "Kütüphane", "val": 0.1014}, "OFFB": {"name": "Ofis", "val": 0.14677}, "POR": {"name": "Sundurma - Veranda", "val": 0.37684}, "TOIA": {"name": "Tuvalet", "val": 1.23939}, "TOIL": {"name": "Tuvalet Lobisi", "val": 0.37182}, "INFD": {"name": "Bebek Doğum Ünitesi", "val": 0.27886}, "KIDD": {"name": "Çocuk Departmanı", "val": 0.37182}, "SLU": {"name": "Kanal", "val": 0.16166}, "CNT": {"name": "Kantin", "val": 0.22309}, "KITN": {"name": "Mutfak", "val": 0.55772}, "LAB": {"name": "Laboratuvar", "val": 0.24249}, "LOBB": {"name": "Lobi", "val": 0.11619}, "LUNS": {"name": "Yemek Salonu", "val": 0.29666}, "STCB": {"name": "Merdiven", "val": 0.19777}, "TOIB": {"name": "Tuvalet", "val": 0.61969}, "ISO": {"name": "İzole Oda", "val": 0.23239}, "EDGE": {"name": "Kenar-Köşe Paspas", "val": 0.06972}, "COME": {"name": "Büyük itmeli - saatlik perf. 1800 m2", "val": 0.03098}, "YM": {"name": "Yürüyen Merdiven", "val": 36.25209}, "KONYE": {"name": "Konteyner Yıkama - Evsel Atık", "val": 6.04202}, "KONYT": {"name": "Konteyner Yıkama - Tıbbi Atık", "val": 9.66722}, "KONYG": {"name": "Konteyner Yıkama - Geri Dönüşüm", "val": 7.25042}}, "Avm/Mağaza": {"BREA": {"name": "Ortak Alan", "val": 0.2}, "FITN": {"name": "Fitness Salonu", "val": 0.2}, "GUAR": {"name": "Gözlem Odası", "val": 0.2069}, "OFFD": {"name": "Ofis", "val": 0.12}, "TOIC": {"name": "Tuvalet", "val": 0.5}, "WORK": {"name": "Çalışma atölyesi", "val": 0.12121}, "NURS": {"name": "Hemşire Odası", "val": 0.4}, "XRSL": {"name": "X-Ray Koruma", "val": 0.26087}, "CARP": {"name": "Ahşapla çalışma odası", "val": 0.20134}, "CLAS": {"name": "Sınıf ve wc+lavabo", "val": 0.23438}, "TOIR": {"name": "Tuvalet", "val": 0.6}, "COOL": {"name": "Soğuk Hava Alanı", "val": 0.66667}, "FRUI": {"name": "Meyve/Sebze Bölümü", "val": 0.2}, "STOR": {"name": "Mağaza makine temizlik alanı", "val": 0.1}, "COMB": {"name": "Küçük itmeli - saatlik perf. 700 m2", "val": 0.09257}, "COMC": {"name": "Orta itmeli - saatlik perf. 1400 m2", "val": 0.04286}, "COMD": {"name": "Büyük itmeli - saatlik perf. 1600 m2", "val": 0.0375}, "COMH": {"name": "Büyük Binicili - saatlik perf. 5000 m2", "val": 0.01268}, "ARC": {"name": "Arşiv", "val": 0.1}, "AUDS": {"name": "Konferans Salonu", "val": 0.32432}, "CLP": {"name": "Temizlik Odası", "val": 0.15}, "COM": {"name": "Server Odası", "val": 0.17143}, "ELEV": {"name": "Asansör", "val": 1.71429}, "LOCK": {"name": "Soyunma Odası", "val": 0.18868}, "N-S": {"name": "Belirtilmemiş", "val": 1e-05}, "OFAD": {"name": "Açık Ofis", "val": 0.18182}, "CLIN": {"name": "Klinik", "val": 0.18462}, "WAR2": {"name": "Hasta Odası Çift Yataklı", "val": 0.34286}, "WAR4": {"name": "Hasta Odası 4 Yataklı", "val": 0.15789}, "WAR2A": {"name": "Hasta Odası Çift Yataklı", "val": 0.4428}, "WAR4A": {"name": "Hasta Odası 4 Yataklı", "val": 0.40816}, "XRAY": {"name": "X-Ray (Röntgen vs alanlar)", "val": 0.19355}, "CLA": {"name": "Sınıf", "val": 0.21818}, "SCHK": {"name": "Deney/Lab Sınıfı", "val": 0.1875}, "CHEC": {"name": "Çıkış alanı", "val": 0.4}, "FISH": {"name": "Balık Bölümü", "val": 0.4}, "FRES": {"name": "Taze Gıda Bölümü", "val": 0.42857}, "STOM": {"name": "Mağaza mop alanları", "val": 0.15}, "COMF": {"name": "Küçük Binicili - saatlik perf. 2500 m2", "val": 0.0288}, "OFFC": {"name": "Ofis", "val": 0.13636}, "SORT": {"name": "Elleçleme Odası", "val": 0.1875}, "DEMO": {"name": "Numune Odası", "val": 0.1875}, "MED": {"name": "İlaç Odası (Hazırlama)", "val": 0.1875}, "TRE": {"name": "Tedavi Odası", "val": 0.19355}, "WAR1": {"name": "Hasta Odası Tek Yataklı", "val": 0.375}, "MEAT": {"name": "Kasap Bölümü", "val": 0.5}, "COR": {"name": "Koridor", "val": 0.15584}, "KITF": {"name": "Mutfak", "val": 0.38961}, "OVER": {"name": "Gece Ofis", "val": 0.25}, "BATS": {"name": "Banyo", "val": 0.46154}, "DES": {"name": "Dezenfeksiyon Alanı", "val": 0.5}, "ISOS": {"name": "Kanallı İzole Oda", "val": 0.4}, "RINS": {"name": "Kanal Temizliği", "val": 0.24}, "WAR1A": {"name": "Hasta Odası Tek Yataklı", "val": 0.48387}, "COMA": {"name": "Küçük itmeli - saatlik perf. 600 m2", "val": 0.1}, "COMG": {"name": "Orta Binicili - saatlik perf. 3500 m2", "val": 0.01714}, "KITE": {"name": "Küçük Mutfak", "val": 0.3}, "BIRT": {"name": "Doğum Odası", "val": 0.24}, "GRA": {"name": "Muayene Odası", "val": 0.2}, "INFA": {"name": "Bebek Odası", "val": 0.23077}, "CONF": {"name": "Odak/İletişim Odası", "val": 0.15}, "CORA": {"name": "Koridor", "val": 0.13187}, "LOUN": {"name": "Bekleme Salonu", "val": 0.24}, "OFFA": {"name": "Ofis", "val": 0.2}, "OFAN": {"name": "Açık Ofis", "val": 0.15385}, "PRI": {"name": "Yazıcı Odası", "val": 0.18987}, "REC": {"name": "Resepsiyon", "val": 0.15789}, "STCA": {"name": "Merdiven", "val": 0.19672}, "MONI": {"name": "İzleme Odası", "val": 0.24}, "WASH": {"name": "Bulaşıkhane", "val": 0.3871}, "GRRO": {"name": "Çocuk Grup Odası", "val": 0.27273}, "GYM": {"name": "Spor/Fitness Salonu", "val": 0.06593}, "PLAY": {"name": "Oyun Odası", "val": 0.3}, "READ": {"name": "Okuma Odası", "val": 0.21429}, "SPOS": {"name": "Spor Salonu", "val": 0.03429}, "STAF": {"name": "Çalışan Odası", "val": 0.2}, "BAK": {"name": "Fırın", "val": 0.27273}, "COMI": {"name": "Büyük Binicili - saatlik perf. 5000 m2 üzeri", "val": 0.00952}, "MEET": {"name": "Toplantı Odası", "val": 0.19672}, "SHOW": {"name": "Duş", "val": 0.36364}, "STOS": {"name": "Depo", "val": 0.07792}, "BATH": {"name": "Oda İçinde Banyo", "val": 0.74074}, "LUNL": {"name": "Yemek Salonu", "val": 0.2}, "SMO": {"name": "Sigara odası", "val": 0.21429}, "SAUN": {"name": "Sauna", "val": 1.0}, "LAX": {"name": "Dinlenme Odası", "val": 0.63158}, "SUR": {"name": "Ameliyathane", "val": 1.30435}, "AUDL": {"name": "Konferans Salonu", "val": 0.22222}, "CORB": {"name": "Koridor", "val": 0.10084}, "LABW": {"name": "Laboratuvar Çalışma alanı", "val": 0.33333}, "LIBR": {"name": "Kütüphane", "val": 0.10909}, "OFFB": {"name": "Ofis", "val": 0.15789}, "POR": {"name": "Sundurma - Veranda", "val": 0.40541}, "TOIA": {"name": "Tuvalet", "val": 1.33333}, "TOIL": {"name": "Tuvalet Lobisi", "val": 0.4}, "INFD": {"name": "Bebek Doğum Ünitesi", "val": 0.3}, "KIDD": {"name": "Çocuk Departmanı", "val": 0.4}, "SLU": {"name": "Kanal", "val": 0.17391}, "CNT": {"name": "Kantin", "val": 0.24}, "KITN": {"name": "Mutfak", "val": 0.6}, "LAB": {"name": "Laboratuvar", "val": 0.26087}, "LOBB": {"name": "Lobi", "val": 0.125}, "LUNS": {"name": "Yemek Salonu", "val": 0.31915}, "STCB": {"name": "Merdiven", "val": 0.21277}, "TOIB": {"name": "Tuvalet", "val": 0.66667}, "ISO": {"name": "İzole Oda", "val": 0.25}, "EDGE": {"name": "Kenar-Köşe Paspas", "val": 0.075}, "COME": {"name": "Büyük itmeli - saatlik perf. 1800 m2", "val": 0.03333}, "YM": {"name": "Yürüyen Merdiven", "val": 39.0}, "KONYE": {"name": "Konteyner Yıkama - Evsel Atık", "val": 6.5}, "KONYT": {"name": "Konteyner Yıkama - Tıbbi Atık", "val": 10.4}, "KONYG": {"name": "Konteyner Yıkama - Geri Dönüşüm", "val": 7.8}}, "Okul": {"BREA": {"name": "Ortak Alan", "val": 0.15385}, "FITN": {"name": "Fitness Salonu", "val": 0.15385}, "GUAR": {"name": "Gözlem Odası", "val": 0.15915}, "OFFD": {"name": "Ofis", "val": 0.09231}, "TOIC": {"name": "Tuvalet", "val": 0.38462}, "WORK": {"name": "Çalışma atölyesi", "val": 0.09324}, "NURS": {"name": "Hemşire Odası", "val": 0.30769}, "XRSL": {"name": "X-Ray Koruma", "val": 0.20067}, "CARP": {"name": "Ahşapla çalışma odası", "val": 0.15488}, "CLAS": {"name": "Sınıf ve wc+lavabo", "val": 0.18029}, "TOIR": {"name": "Tuvalet", "val": 0.46154}, "COOL": {"name": "Soğuk Hava Alanı", "val": 0.51282}, "FRUI": {"name": "Meyve/Sebze Bölümü", "val": 0.15385}, "STOR": {"name": "Mağaza makine temizlik alanı", "val": 0.07692}, "COMB": {"name": "Küçük itmeli - saatlik perf. 700 m2", "val": 0.07121}, "COMC": {"name": "Orta itmeli - saatlik perf. 1400 m2", "val": 0.03297}, "COMD": {"name": "Büyük itmeli - saatlik perf. 1600 m2", "val": 0.02885}, "COMH": {"name": "Büyük Binicili - saatlik perf. 5000 m2", "val": 0.00976}, "ARC": {"name": "Arşiv", "val": 0.07692}, "AUDS": {"name": "Konferans Salonu", "val": 0.24948}, "CLP": {"name": "Temizlik Odası", "val": 0.11538}, "COM": {"name": "Server Odası", "val": 0.13187}, "ELEV": {"name": "Asansör", "val": 0.92308}, "LOCK": {"name": "Soyunma Odası", "val": 0.14514}, "N-S": {"name": "Belirtilmemiş", "val": 1e-05}, "OFAD": {"name": "Açık Ofis", "val": 0.13986}, "CLIN": {"name": "Klinik", "val": 0.14201}, "WAR2": {"name": "Hasta Odası Çift Yataklı", "val": 0.26374}, "WAR4": {"name": "Hasta Odası 4 Yataklı", "val": 0.24291}, "WAR2A": {"name": "Hasta Odası Çift Yataklı", "val": 0.33994}, "WAR4A": {"name": "Hasta Odası 4 Yataklı", "val": 0.31332}, "XRAY": {"name": "X-Ray (Röntgen vs alanlar)", "val": 0.14888}, "CLA": {"name": "Sınıf", "val": 0.16783}, "SCHK": {"name": "Deney/Lab Sınıfı", "val": 0.14423}, "CHEC": {"name": "Çıkış alanı", "val": 0.30769}, "FISH": {"name": "Balık Bölümü", "val": 0.30769}, "FRES": {"name": "Taze Gıda Bölümü", "val": 0.32967}, "STOM": {"name": "Mağaza mop alanları", "val": 0.11538}, "COMF": {"name": "Küçük Binicili - saatlik perf. 2500 m2", "val": 0.02215}, "OFFC": {"name": "Ofis", "val": 0.1049}, "SORT": {"name": "Elleçleme Odası", "val": 0.14423}, "DEMO": {"name": "Numune Odası", "val": 0.14423}, "MED": {"name": "İlaç Odası (Hazırlama)", "val": 0.14423}, "TRE": {"name": "Tedavi Odası", "val": 0.14888}, "WAR1": {"name": "Hasta Odası Tek Yataklı", "val": 0.28846}, "MEAT": {"name": "Kasap Bölümü", "val": 0.38462}, "COR": {"name": "Koridor", "val": 0.08392}, "KITF": {"name": "Mutfak", "val": 0.2997}, "OVER": {"name": "Gece Ofis", "val": 0.19231}, "BATS": {"name": "Banyo", "val": 0.35503}, "DES": {"name": "Dezenfeksiyon Alanı", "val": 0.38462}, "ISOS": {"name": "Kanallı İzole Oda", "val": 0.30769}, "RINS": {"name": "Kanal Temizliği", "val": 0.18462}, "WAR1A": {"name": "Hasta Odası Tek Yataklı", "val": 0.37152}, "COMA": {"name": "Küçük itmeli - saatlik perf. 600 m2", "val": 0.07692}, "COMG": {"name": "Orta Binicili - saatlik perf. 3500 m2", "val": 0.01319}, "KITE": {"name": "Küçük Mutfak", "val": 0.23077}, "BIRT": {"name": "Doğum Odası", "val": 0.18462}, "GRA": {"name": "Muayene Odası", "val": 0.15385}, "INFA": {"name": "Bebek Odası", "val": 0.17751}, "CONF": {"name": "Odak/İletişim Odası", "val": 0.11538}, "CORA": {"name": "Koridor", "val": 0.07101}, "LOUN": {"name": "Bekleme Salonu", "val": 0.18462}, "OFFA": {"name": "Ofis", "val": 0.15385}, "OFAN": {"name": "Açık Ofis", "val": 0.11834}, "PRI": {"name": "Yazıcı Odası", "val": 0.14606}, "REC": {"name": "Resepsiyon", "val": 0.12146}, "STCA": {"name": "Merdiven", "val": 0.15132}, "MONI": {"name": "İzleme Odası", "val": 0.18462}, "WASH": {"name": "Bulaşıkhane", "val": 0.29777}, "GRRO": {"name": "Çocuk Grup Odası", "val": 0.20979}, "GYM": {"name": "Spor/Fitness Salonu", "val": 0.05072}, "PLAY": {"name": "Oyun Odası", "val": 0.23077}, "READ": {"name": "Okuma Odası", "val": 0.16484}, "SPOS": {"name": "Spor Salonu", "val": 0.02637}, "STAF": {"name": "Çalışan Odası", "val": 0.15385}, "BAK": {"name": "Fırın", "val": 0.20979}, "COMI": {"name": "Büyük Binicili - saatlik perf. 5000 m2 üzeri", "val": 0.00733}, "MEET": {"name": "Toplantı Odası", "val": 0.15132}, "SHOW": {"name": "Duş", "val": 0.27972}, "STOS": {"name": "Depo", "val": 0.04196}, "BATH": {"name": "Oda İçinde Banyo", "val": 0.5698}, "LUNL": {"name": "Yemek Salonu", "val": 0.15385}, "SMO": {"name": "Sigara odası", "val": 0.16484}, "SAUN": {"name": "Sauna", "val": 0.76923}, "LAX": {"name": "Dinlenme Odası", "val": 0.48583}, "SUR": {"name": "Ameliyathane", "val": 1.0}, "AUDL": {"name": "Konferans Salonu", "val": 0.17094}, "CORB": {"name": "Koridor", "val": 0.0543}, "LABW": {"name": "Laboratuvar Çalışma alanı", "val": 0.25641}, "LIBR": {"name": "Kütüphane", "val": 0.08392}, "OFFB": {"name": "Ofis", "val": 0.12146}, "POR": {"name": "Sundurma - Veranda", "val": 0.31185}, "TOIA": {"name": "Tuvalet", "val": 1.02564}, "TOIL": {"name": "Tuvalet Lobisi", "val": 0.30769}, "INFD": {"name": "Bebek Doğum Ünitesi", "val": 0.23077}, "KIDD": {"name": "Çocuk Departmanı", "val": 0.30769}, "SLU": {"name": "Kanal", "val": 0.13378}, "CNT": {"name": "Kantin", "val": 0.18462}, "KITN": {"name": "Mutfak", "val": 0.46154}, "LAB": {"name": "Laboratuvar", "val": 0.20067}, "LOBB": {"name": "Lobi", "val": 0.09615}, "LUNS": {"name": "Yemek Salonu", "val": 0.2455}, "STCB": {"name": "Merdiven", "val": 0.16367}, "TOIB": {"name": "Tuvalet", "val": 0.51282}, "ISO": {"name": "İzole Oda", "val": 0.19231}, "EDGE": {"name": "Kenar-Köşe Paspas", "val": 0.05769}, "COME": {"name": "Büyük itmeli - saatlik perf. 1800 m2", "val": 0.02564}, "YM": {"name": "Yürüyen Merdiven", "val": 30.0}, "KONYE": {"name": "Konteyner Yıkama - Evsel Atık", "val": 5.0}, "KONYT": {"name": "Konteyner Yıkama - Tıbbi Atık", "val": 8.0}, "KONYG": {"name": "Konteyner Yıkama - Geri Dönüşüm", "val": 6.0}}, "Dikey Bina": {"ARC": {"name": "Arşiv", "val": 0.1}, "AUDL": {"name": "Konferans Salonu", "val": 0.22222}, "AUDS": {"name": "Konferans Salonu", "val": 0.32432}, "BAK": {"name": "Fırın", "val": 0.27273}, "BATH": {"name": "Oda İçinde Banyo", "val": 0.74074}, "BATS": {"name": "Banyo", "val": 0.46154}, "BIRT": {"name": "Doğum Odası", "val": 0.24}, "BREA": {"name": "Ortak Alan", "val": 0.2}, "CARP": {"name": "Ahşapla çalışma odası", "val": 0.20134}, "CHEC": {"name": "Çıkış alanı", "val": 0.4}, "CLA": {"name": "Sınıf", "val": 0.21818}, "CLAS": {"name": "Sınıf ve wc+lavabo", "val": 0.23438}, "CLIN": {"name": "Klinik", "val": 0.18462}, "CLP": {"name": "Temizlik Odası", "val": 0.15}, "CNT": {"name": "Kantin", "val": 0.24}, "COM": {"name": "Server Odası", "val": 0.17143}, "COMA": {"name": "Küçük itmeli - saatlik perf. 600 m2", "val": 0.1}, "COMB": {"name": "Küçük itmeli - saatlik perf. 700 m2", "val": 0.09257}, "COMC": {"name": "Orta itmeli - saatlik perf. 1400 m2", "val": 0.04286}, "COMD": {"name": "Büyük itmeli - saatlik perf. 1600 m2", "val": 0.0375}, "COME": {"name": "Büyük itmeli - saatlik perf. 1800 m2", "val": 0.03333}, "COMF": {"name": "Küçük Binicili - saatlik perf. 2500 m2", "val": 0.0288}, "COMG": {"name": "Orta Binicili - saatlik perf. 3500 m2", "val": 0.01714}, "COMH": {"name": "Büyük Binicili - saatlik perf. 5000 m2", "val": 0.01268}, "COMI": {"name": "Büyük Binicili - saatlik perf. 5000 m2 üzeri", "val": 0.00952}, "CONF": {"name": "Odak/İletişim Odası", "val": 0.15}, "COOL": {"name": "Soğuk Hava Alanı", "val": 0.66667}, "COR": {"name": "Koridor", "val": 0.10909}, "CORA": {"name": "Koridor", "val": 0.09231}, "CORB": {"name": "Koridor", "val": 0.07059}, "DEMO": {"name": "Numune Odası", "val": 0.1875}, "DES": {"name": "Dezenfeksiyon Alanı", "val": 0.5}, "EDGE": {"name": "Kenar-Köşe Paspas", "val": 0.075}, "ELEV": {"name": "Asansör", "val": 1.2}, "FISH": {"name": "Balık Bölümü", "val": 0.4}, "FITN": {"name": "Fitness Salonu", "val": 0.2}, "FRES": {"name": "Taze Gıda Bölümü", "val": 0.42857}, "FRUI": {"name": "Meyve/Sebze Bölümü", "val": 0.2}, "GRA": {"name": "Muayene Odası", "val": 0.2}, "GRRO": {"name": "Çocuk Grup Odası", "val": 0.27273}, "GUAR": {"name": "Gözlem Odası", "val": 0.2069}, "GYM": {"name": "Spor/Fitness Salonu", "val": 0.06593}, "INFA": {"name": "Bebek Odası", "val": 0.23077}, "INFD": {"name": "Bebek Doğum Ünitesi", "val": 0.3}, "ISO": {"name": "İzole Oda", "val": 0.25}, "ISOS": {"name": "Kanallı İzole Oda", "val": 0.4}, "KIDD": {"name": "Çocuk Departmanı", "val": 0.4}, "KITE": {"name": "Küçük Mutfak", "val": 0.3}, "KITF": {"name": "Mutfak", "val": 0.38961}, "KITN": {"name": "Mutfak", "val": 0.6}, "KONYE": {"name": "Konteyner Yıkama - Evsel Atık", "val": 6.5}, "KONYG": {"name": "Konteyner Yıkama - Geri Dönüşüm", "val": 7.8}, "KONYT": {"name": "Konteyner Yıkama - Tıbbi Atık", "val": 10.4}, "LAB": {"name": "Laboratuvar", "val": 0.26087}, "LABW": {"name": "Laboratuvar Çalışma alanı", "val": 0.33333}, "LAX": {"name": "Dinlenme Odası", "val": 0.63158}, "LIBR": {"name": "Kütüphane", "val": 0.10909}, "LOBB": {"name": "Lobi", "val": 0.125}, "LOCK": {"name": "Soyunma Odası", "val": 0.18868}, "LOUN": {"name": "Bekleme Salonu", "val": 0.24}, "LUNL": {"name": "Yemek Salonu", "val": 0.2}, "LUNS": {"name": "Yemek Salonu", "val": 0.31915}, "MEAT": {"name": "Kasap Bölümü", "val": 0.5}, "MED": {"name": "İlaç Odası (Hazırlama)", "val": 0.1875}, "MEET": {"name": "Toplantı Odası", "val": 0.19672}, "MONI": {"name": "İzleme Odası", "val": 0.24}, "N-S": {"name": "Belirtilmemiş", "val": 1e-05}, "NURS": {"name": "Hemşire Odası", "val": 0.4}, "OFAD": {"name": "Açık Ofis", "val": 0.18182}, "OFAN": {"name": "Açık Ofis", "val": 0.15385}, "OFFA": {"name": "Ofis", "val": 0.2}, "OFFB": {"name": "Ofis", "val": 0.15789}, "OFFC": {"name": "Ofis", "val": 0.13636}, "OFFD": {"name": "Ofis", "val": 0.12}, "OVER": {"name": "Gece Ofis", "val": 0.25}, "PLAY": {"name": "Oyun Odası", "val": 0.3}, "POR": {"name": "Sundurma - Veranda", "val": 0.40541}, "PRI": {"name": "Yazıcı Odası", "val": 0.18987}, "READ": {"name": "Okuma Odası", "val": 0.21429}, "REC": {"name": "Resepsiyon", "val": 0.15789}, "RINS": {"name": "Kanal Temizliği", "val": 0.24}, "SAUN": {"name": "Sauna", "val": 1.0}, "SCHK": {"name": "Deney/Lab Sınıfı", "val": 0.1875}, "SHOW": {"name": "Duş", "val": 0.36364}, "SLU": {"name": "Kanal", "val": 0.17391}, "SMO": {"name": "Sigara odası", "val": 0.21429}, "SORT": {"name": "Elleçleme Odası", "val": 0.1875}, "SPOS": {"name": "Spor Salonu", "val": 0.03429}, "STAF": {"name": "Çalışan Odası", "val": 0.2}, "STCA": {"name": "Merdiven", "val": 0.19672}, "STCB": {"name": "Merdiven", "val": 0.21277}, "STOM": {"name": "Mağaza mop alanları", "val": 0.15}, "STOR": {"name": "Mağaza makine temizlik alanı", "val": 0.1}, "STOS": {"name": "Depo", "val": 0.05455}, "SUR": {"name": "Ameliyathane", "val": 1.30435}, "TOIA": {"name": "Tuvalet", "val": 1.33333}, "TOIB": {"name": "Tuvalet", "val": 0.66667}, "TOIC": {"name": "Tuvalet", "val": 0.5}, "TOIL": {"name": "Tuvalet Lobisi", "val": 0.4}, "TOIR": {"name": "Tuvalet", "val": 0.6}, "TRE": {"name": "Tedavi Odası", "val": 0.19355}, "WAR1": {"name": "Hasta Odası Tek Yataklı", "val": 0.375}, "WAR1A": {"name": "Hasta Odası Tek Yataklı", "val": 0.48387}, "WAR2": {"name": "Hasta Odası Çift Yataklı", "val": 0.34286}, "WAR2A": {"name": "Hasta Odası Çift Yataklı", "val": 0.4428}, "WAR4": {"name": "Hasta Odası 4 Yataklı", "val": 0.31579}, "WAR4A": {"name": "Hasta Odası 4 Yataklı", "val": 0.40816}, "WASH": {"name": "Bulaşıkhane", "val": 0.3871}, "WORK": {"name": "Çalışma atölyesi", "val": 0.12121}, "XRAY": {"name": "X-Ray (Röntgen vs alanlar)", "val": 0.19355}, "XRSL": {"name": "X-Ray Koruma", "val": 0.26087}, "YM": {"name": "Yürüyen Merdiven", "val": 39.0}}, "Fabrika": {"BREA": {"name": "Ortak Alan", "val": 0.22671}, "FITN": {"name": "Fitness Salonu", "val": 0.22671}, "GUAR": {"name": "Gözlem Odası", "val": 0.23452}, "OFFD": {"name": "Ofis", "val": 0.13602}, "TOIC": {"name": "Tuvalet", "val": 0.56676}, "WORK": {"name": "Çalışma atölyesi", "val": 0.1374}, "NURS": {"name": "Hemşire Odası", "val": 0.45341}, "XRSL": {"name": "X-Ray Koruma", "val": 0.2957}, "CARP": {"name": "Ahşapla çalışma odası", "val": 0.22823}, "CLAS": {"name": "Sınıf ve wc+lavabo", "val": 0.26567}, "TOIR": {"name": "Tuvalet", "val": 0.68012}, "COOL": {"name": "Soğuk Hava Alanı", "val": 0.75569}, "FRUI": {"name": "Meyve/Sebze Bölümü", "val": 0.22671}, "STOR": {"name": "Mağaza makine temizlik alanı", "val": 0.11335}, "COMB": {"name": "Küçük itmeli - saatlik perf. 700 m2", "val": 0.10493}, "COMC": {"name": "Orta itmeli - saatlik perf. 1400 m2", "val": 0.04858}, "COMD": {"name": "Büyük itmeli - saatlik perf. 1600 m2", "val": 0.04251}, "COMH": {"name": "Büyük Binicili - saatlik perf. 5000 m2", "val": 0.01438}, "ARC": {"name": "Arşiv", "val": 0.11335}, "AUDS": {"name": "Konferans Salonu", "val": 0.36763}, "CLP": {"name": "Temizlik Odası", "val": 0.17003}, "COM": {"name": "Server Odası", "val": 0.19432}, "ELEV": {"name": "Asansör", "val": 1.36024}, "LOCK": {"name": "Soyunma Odası", "val": 0.21387}, "N-S": {"name": "Belirtilmemiş", "val": 1e-05}, "OFAD": {"name": "Açık Ofis", "val": 0.2061}, "CLIN": {"name": "Klinik", "val": 0.20927}, "WAR2": {"name": "Hasta Odası Çift Yataklı", "val": 0.38864}, "WAR4": {"name": "Hasta Odası 4 Yataklı", "val": 0.35796}, "WAR2A": {"name": "Hasta Odası Çift Yataklı", "val": 0.50209}, "WAR4A": {"name": "Hasta Odası 4 Yataklı", "val": 0.46332}, "XRAY": {"name": "X-Ray (Röntgen vs alanlar)", "val": 0.21939}, "CLA": {"name": "Sınıf", "val": 0.24732}, "SCHK": {"name": "Deney/Lab Sınıfı", "val": 0.21254}, "CHEC": {"name": "Çıkış alanı", "val": 0.45341}, "FISH": {"name": "Balık Bölümü", "val": 0.45341}, "FRES": {"name": "Taze Gıda Bölümü", "val": 0.4858}, "STOM": {"name": "Mağaza mop alanları", "val": 0.17003}, "COMF": {"name": "Küçük Binicili - saatlik perf. 2500 m2", "val": 0.03265}, "OFFC": {"name": "Ofis", "val": 0.15457}, "SORT": {"name": "Elleçleme Odası", "val": 0.21254}, "DEMO": {"name": "Numune Odası", "val": 0.21254}, "MED": {"name": "İlaç Odası (Hazırlama)", "val": 0.21254}, "TRE": {"name": "Tedavi Odası", "val": 0.21939}, "WAR1": {"name": "Hasta Odası Tek Yataklı", "val": 0.42507}, "MEAT": {"name": "Kasap Bölümü", "val": 0.56676}, "COR": {"name": "Koridor", "val": 0.12366}, "KITF": {"name": "Mutfak", "val": 0.44163}, "OVER": {"name": "Gece Ofis", "val": 0.28338}, "BATS": {"name": "Banyo", "val": 0.52317}, "DES": {"name": "Dezenfeksiyon Alanı", "val": 0.56676}, "ISOS": {"name": "Kanallı İzole Oda", "val": 0.45341}, "RINS": {"name": "Kanal Temizliği", "val": 0.27205}, "WAR1A": {"name": "Hasta Odası Tek Yataklı", "val": 0.55046}, "COMA": {"name": "Küçük itmeli - saatlik perf. 600 m2", "val": 0.11335}, "COMG": {"name": "Orta Binicili - saatlik perf. 3500 m2", "val": 0.01943}, "KITE": {"name": "Küçük Mutfak", "val": 0.34006}, "BIRT": {"name": "Doğum Odası", "val": 0.27205}, "GRA": {"name": "Muayene Odası", "val": 0.22671}, "INFA": {"name": "Bebek Odası", "val": 0.26158}, "CONF": {"name": "Odak/İletişim Odası", "val": 0.17003}, "CORA": {"name": "Koridor", "val": 0.10463}, "LOUN": {"name": "Bekleme Salonu", "val": 0.27205}, "OFFA": {"name": "Ofis", "val": 0.22671}, "OFAN": {"name": "Açık Ofis", "val": 0.17439}, "PRI": {"name": "Yazıcı Odası", "val": 0.21523}, "REC": {"name": "Resepsiyon", "val": 0.17898}, "STCA": {"name": "Merdiven", "val": 0.22299}, "MONI": {"name": "İzleme Odası", "val": 0.27205}, "WASH": {"name": "Bulaşıkhane", "val": 0.43879}, "GRRO": {"name": "Çocuk Grup Odası", "val": 0.30914}, "GYM": {"name": "Spor/Fitness Salonu", "val": 0.07474}, "PLAY": {"name": "Oyun Odası", "val": 0.34006}, "READ": {"name": "Okuma Odası", "val": 0.2429}, "SPOS": {"name": "Spor Salonu", "val": 0.03886}, "STAF": {"name": "Çalışan Odası", "val": 0.22671}, "BAK": {"name": "Fırın", "val": 0.30914}, "COMI": {"name": "Büyük Binicili - saatlik perf. 5000 m2 üzeri", "val": 0.0108}, "MEET": {"name": "Toplantı Odası", "val": 0.22299}, "SHOW": {"name": "Duş", "val": 0.41219}, "STOS": {"name": "Depo", "val": 0.06183}, "BATH": {"name": "Oda İçinde Banyo", "val": 0.83965}, "LUNL": {"name": "Yemek Salonu", "val": 0.22671}, "SMO": {"name": "Sigara odası", "val": 0.2429}, "SAUN": {"name": "Sauna", "val": 1.13208}, "LAX": {"name": "Dinlenme Odası", "val": 0.71591}, "SUR": {"name": "Ameliyathane", "val": 1.46341}, "AUDL": {"name": "Konferans Salonu", "val": 0.2519}, "CORB": {"name": "Koridor", "val": 0.08001}, "LABW": {"name": "Laboratuvar Çalışma alanı", "val": 0.37784}, "LIBR": {"name": "Kütüphane", "val": 0.12366}, "OFFB": {"name": "Ofis", "val": 0.17898}, "POR": {"name": "Sundurma - Veranda", "val": 0.45954}, "TOIA": {"name": "Tuvalet", "val": 1.51137}, "TOIL": {"name": "Tuvalet Lobisi", "val": 0.45341}, "INFD": {"name": "Bebek Doğum Ünitesi", "val": 0.34006}, "KIDD": {"name": "Çocuk Departmanı", "val": 0.45341}, "SLU": {"name": "Kanal", "val": 0.19714}, "CNT": {"name": "Kantin", "val": 0.27205}, "KITN": {"name": "Mutfak", "val": 0.68012}, "LAB": {"name": "Laboratuvar", "val": 0.2957}, "LOBB": {"name": "Lobi", "val": 0.14169}, "LUNS": {"name": "Yemek Salonu", "val": 0.36176}, "STCB": {"name": "Merdiven", "val": 0.24118}, "TOIB": {"name": "Tuvalet", "val": 0.75569}, "ISO": {"name": "İzole Oda", "val": 0.28338}, "EDGE": {"name": "Kenar-Köşe Paspas", "val": 0.08501}, "COME": {"name": "Büyük itmeli - saatlik perf. 1800 m2", "val": 0.03778}, "YM": {"name": "Yürüyen Merdiven", "val": 44.20766}, "KONYE": {"name": "Konteyner Yıkama - Evsel Atık", "val": 7.36794}, "KONYT": {"name": "Konteyner Yıkama - Tıbbi Atık", "val": 11.78871}, "KONYG": {"name": "Konteyner Yıkama - Geri Dönüşüm", "val": 8.84153}}};
+        const originalProjectNorms = {"BU": {"name": "Cila", "val": 158.4}, "CEC": {"name": "Halı Yıkama", "val": 1.7}, "COF1": {"name": "Kahve Makinesi", "val": 0.072}, "CSC": {"name": "Buharlı Perde Silimi", "val": 1.818}, "EDGE": {"name": "Köşe Moplama", "val": 0.15}, "HDU": {"name": "Yüksek Alan Toz Alımı", "val": 0.198}, "LBO": {"name": "Hafif Parlatma", "val": 1.716}, "LBP": {"name": "Hafif Parlatma & Cilalama", "val": 19.92}, "MC": {"name": "Ekstra Temizlik", "val": 0.0}, "PARK": {"name": "Park Alanı", "val": 0.018}, "S": {"name": "Ovalama", "val": 1.5}, "SB": {"name": "Ovalama & Cilalama", "val": 120.0}, "SO": {"name": "Ovalama (Yağlama)", "val": 6.666}, "TC": {"name": "Kapsamlı Temizlik", "val": 3.75}, "TCC": {"name": "Kapsamlı Temizlik (Koridor)", "val": 3.528}, "TCO": {"name": "Kapsamlı Temizlik (Ofis)", "val": 4.002}, "TCSA": {"name": "Kapsamlı Temizlik (Sıhhi)", "val": 6.666}, "TCST": {"name": "Kapsamlı Temizlik (Merdiven)", "val": 4.998}, "WALK": {"name": "Yürüme Zamanı", "val": 0.012}, "WC1": {"name": "İç Cam Temizliği", "val": 1.716}, "WC2": {"name": "Dış Cam Temizliği", "val": 3.528}};
+
+        // Master Veritabanı Değişkenleri
+        let dailyNorms = JSON.parse(JSON.stringify(originalDailyNorms));
+        let projectNorms = JSON.parse(JSON.stringify(originalProjectNorms));
+
+        // State Değişkenleri
+        let currentSector = "Hastane";
+        let areaRows = [
+            { id: 1, type: "Günlük", zone: "Zemin Kat", name: "Poliklinik Koridoru", code: "COR", freqS1: 1, freqS2: 1, freqS3: 0, quantity: 1, area: 450, frequency: 30 },
+            { id: 2, type: "Günlük", zone: "Zemin Kat", name: "Genel Tuvaletler", code: "TOIC", freqS1: 2, freqS2: 1, freqS3: 1, quantity: 4, area: 120, frequency: 30 },
+            { id: 3, type: "Proje", zone: "Tüm Tesis", name: "Zemin Cilalama İşlemi", code: "BU", freqS1: 0, freqS2: 0, freqS3: 1, quantity: 1, area: 2500, frequency: 1 }
+        ];
+
+        let historyStack = [];
+        let redoStack = [];
+
+        function saveHistory() {
+            historyStack.push(JSON.parse(JSON.stringify(areaRows)));
+            if (historyStack.length > 30) historyStack.shift();
+            redoStack = [];
+            updateUndoRedoButtons();
+        }
+
+        function undo() {
+            if (historyStack.length > 0) {
+                redoStack.push(JSON.parse(JSON.stringify(areaRows)));
+                areaRows = historyStack.pop();
+                renderAreaRows();
+                updateUndoRedoButtons();
+            }
+        }
+
+        function redo() {
+            if (redoStack.length > 0) {
+                historyStack.push(JSON.parse(JSON.stringify(areaRows)));
+                areaRows = redoStack.pop();
+                renderAreaRows();
+                updateUndoRedoButtons();
+            }
+        }
+
+        function updateUndoRedoButtons() {
+            document.getElementById('btnUndo').disabled = historyStack.length === 0;
+            document.getElementById('btnRedo').disabled = redoStack.length === 0;
+        }
+
+        window.addEventListener('beforeunload', function (e) {
+            e.preventDefault();
+            e.returnValue = '';
+        });
+
+        function showToast(message) {
+            const x = document.getElementById("toast");
+            x.textContent = message;
+            x.className = "show";
+            setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
+        }
+
+        function initApp() {
+            const sectorSelect = document.getElementById('projectSector');
+            sectorSelect.innerHTML = '<option value="" disabled ' + (!currentSector ? 'selected' : '') + ' hidden>Seçiniz</option>';
+            for (let sector in dailyNorms) {
+                const opt = document.createElement('option');
+                opt.value = sector;
+                opt.textContent = sector;
+                if (sector === currentSector) opt.selected = true;
+                sectorSelect.appendChild(opt);
+            }
+            renderAreaRows();
+            initNormDb();
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            if(window.event && window.event.currentTarget) {
+                window.event.currentTarget.classList.add('active');
+            } else {
+                const btn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(tabId));
+                if(btn) btn.classList.add('active');
+            }
+            if(tabId === 'dashboard') updateDashboardView();
+            if(tabId === 'dataEntry') renderAreaRows();
+        }
+
+        function changeSector() {
+            currentSector = document.getElementById('projectSector').value;
+            saveHistory();
+            areaRows.forEach(row => {
+                if(row.type === 'Günlük') {
+                    if (dailyNorms[currentSector]) {
+                        if (!dailyNorms[currentSector][row.code]) {
+                            row.code = Object.keys(dailyNorms[currentSector])[0] || "";
+                        }
+                    } else {
+                        row.code = "";
+                    }
+                }
+            });
+            renderAreaRows();
+            const dbFilter = document.getElementById('dbSectorFilter');
+            if (dbFilter) {
+               dbFilter.value = currentSector || Object.keys(dailyNorms)[0];
+            }
+            renderNormTable();
+        }
+
+        function renderAreaRows() {
+            if (typeof $ !== 'undefined') {
+                $('.code-select').each(function() {
+                    if ($(this).data('select2')) { $(this).select2('destroy'); }
+                });
+            }
+
+            const tbody = document.getElementById('areaTableBody');
+            tbody.innerHTML = '';
+
+            areaRows.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.setAttribute('data-id', row.id);
+
+                let typeSelect = `
+                    <select class="tbl-input" style="padding:0.2rem;" onchange="updateRow(${row.id}, 'type', this.value)">
+                        <option value="Günlük" ${row.type === 'Günlük' ? 'selected' : ''}>Günlük</option>
+                        <option value="Proje" ${row.type === 'Proje' ? 'selected' : ''}>Proje</option>
+                    </select>
+                `;
+
+                let codeSelect = `<select class="tbl-input code-select" data-id="${row.id}" style="width:100%;">`;
+                let currentNormVal = 0;
+
+                if (row.type === 'Günlük') {
+                    const rooms = dailyNorms[currentSector] || {};
+                    for (let c in rooms) {
+                        codeSelect += `<option value="${c}" ${row.code === c ? 'selected' : ''}>[${c}] ${rooms[c].name}</option>`;
+                    }
+                    if (rooms[row.code]) currentNormVal = rooms[row.code].val;
+                } else {
+                    for (let c in projectNorms) {
+                        codeSelect += `<option value="${c}" ${row.code === c ? 'selected' : ''}>[${c}] ${projectNorms[c].name}</option>`;
+                    }
+                    if (projectNorms[row.code]) currentNormVal = projectNorms[row.code].val;
+                }
+                codeSelect += `</select>`;
+
+                let zoneInput = `<input type="text" class="tbl-input" style="padding:0.1rem; font-size:0.8rem;" value="${row.zone || ''}" onchange="updateRow(${row.id}, 'zone', this.value)">`;
+                let nameInput = `<input type="text" class="tbl-input" style="padding:0.1rem; font-size:0.8rem;" value="${row.name}" onchange="updateRow(${row.id}, 'name', this.value)">`;
+                let qtyInput = `<input type="number" step="1" min="1" class="tbl-input num" style="padding:0.1rem; font-size:0.8rem;" value="${row.quantity || 1}" onchange="updateRow(${row.id}, 'quantity', this.value)">`;
+                let areaInput = `<input type="number" class="tbl-input num" style="padding:0.1rem; font-size:0.8rem;" value="${row.area}" onchange="updateRow(${row.id}, 'area', this.value)">`;
+                let f1Input = `<input type="number" step="0.5" min="0" class="tbl-input num" style="padding:0.1rem; font-size:0.8rem; color:#3b82f6;" value="${row.freqS1 !== undefined ? row.freqS1 : 1}" onchange="updateRow(${row.id}, 'freqS1', this.value)">`;
+                let f2Input = `<input type="number" step="0.5" min="0" class="tbl-input num" style="padding:0.1rem; font-size:0.8rem; color:#8b5cf6;" value="${row.freqS2 || 0}" onchange="updateRow(${row.id}, 'freqS2', this.value)">`;
+                let f3Input = `<input type="number" step="0.5" min="0" class="tbl-input num" style="padding:0.1rem; font-size:0.8rem; color:#10b981;" value="${row.freqS3 || 0}" onchange="updateRow(${row.id}, 'freqS3', this.value)">`;
+                let freqInput = `<input type="number" step="0.5" class="tbl-input num" style="padding:0.1rem; font-size:0.8rem;" value="${row.frequency}" onchange="updateRow(${row.id}, 'frequency', this.value)">`;
+
+                tr.innerHTML = `
+                    <td>${typeSelect}</td>
+                    <td>${zoneInput}</td>
+                    <td>${nameInput}</td>
+                    <td>${codeSelect}</td>
+                    <td>${qtyInput}</td>
+                    <td>${areaInput}</td>
+                    <td>${f1Input}</td>
+                    <td>${f2Input}</td>
+                    <td>${f3Input}</td>
+                    <td>${freqInput}</td>
+                    <td style="text-align:right;"><span class="badge">${currentNormVal.toFixed(4)}</span></td>
+                    <td id="calc-hours-${row.id}" style="text-align:right; font-weight:700; color:var(--text-muted);">0</td>
+                    <td id="calc-staff-${row.id}" style="text-align:right; font-weight:700; color:var(--accent);">0.00</td>
+                    <td style="text-align:center; padding: 0.2rem;">
+                        <button class="btn btn-secondary btn-sm" style="padding:0.2rem; margin-bottom:0.2rem; width:100%;" onclick="cloneAreaRow(${row.id})" title="Kopyala">📋</button>
+                        <button class="btn btn-danger btn-sm" style="padding:0.2rem; width:100%;" onclick="deleteAreaRow(${row.id})" title="Sil">🗑️</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            if (typeof $ !== 'undefined') {
+                try {
+                    $('.code-select').select2({
+                        placeholder: "Kod Arama",
+                        allowClear: false,
+                        width: '100%',
+                        dropdownParent: $('#dataEntry')
+                    }).on('change', function(e) {
+                        const id = $(this).data('id');
+                        const val = $(this).val();
+                        updateRow(id, 'code', val, true);
+                    });
+                } catch(err) {
+                    console.error("Select2 error", err);
+                }
+            }
+
+            updateAllMetrics();
+        }
+
+        function updateRow(id, field, value, skipRender=false) {
+            if(!skipRender && field !== 'type' && field !== 'code') saveHistory();
+            const row = areaRows.find(r => r.id === id);
+            if (row) {
+                if (['area', 'frequency', 'freqS1', 'freqS2', 'freqS3', 'quantity'].includes(field)) {
+                    row[field] = parseFloat(value) || 0;
+                } else {
+                    row[field] = value;
+                }
+                
+                if (field === 'type') {
+                    saveHistory();
+                    if (value === 'Günlük') {
+                        row.code = dailyNorms[currentSector] ? (Object.keys(dailyNorms[currentSector])[0] || "") : "";
+                        row.frequency = parseFloat(document.getElementById('facilityDays').value) || 30;
+                    } else {
+                        row.code = Object.keys(projectNorms)[0] || "";
+                        row.frequency = 1;
+                    }
+                    renderAreaRows(); 
+                } else if (field === 'code') {
+                    saveHistory();
+                    updateSingleRowMetrics(row);
+                    updateAllMetrics();
+                } else {
+                    if(!skipRender) {
+                        updateSingleRowMetrics(row);
+                        updateAllMetrics();
+                    }
+                }
+            }
+        }
+
+        function updateSingleRowMetrics(row) {
+            let normValue = 0;
+            if (row.type === 'Günlük' && dailyNorms[currentSector] && dailyNorms[currentSector][row.code]) normValue = dailyNorms[currentSector][row.code].val;
+            if (row.type === 'Proje' && projectNorms[row.code]) normValue = projectNorms[row.code].val;
+
+            const staffDays = parseFloat(document.getElementById('staffDays').value) || 26;
+            const dailyHours = parseFloat(document.getElementById('dailyHours').value) || 7.5;
+            let perfRate = parseFloat(document.getElementById('performanceRate').value) || 100;
+            if (perfRate < 10) perfRate = 10;
+            const perfMultiplier = perfRate / 100;
+
+            const f1 = parseFloat(row.freqS1) || 0;
+            const f2 = parseFloat(row.freqS2) || 0;
+            const f3 = parseFloat(row.freqS3) || 0;
+            let dailyF = f1 + f2 + f3;
+            if (dailyF === 0 && row.type === 'Proje') dailyF = 1; // Fallback for pure projects if no shift defined
+
+            const qty = row.quantity || 1;
+            const rowTotalArea = row.area * qty;
+            
+            let rowHours = ((rowTotalArea * normValue * dailyF * row.frequency) / 60) / perfMultiplier;
+            let rowStaff = rowHours / (staffDays * dailyHours);
+                row._calcHours = rowHours;
+                row._calcStaff = rowStaff;
+
+            const hoursEl = document.getElementById(`calc-hours-${row.id}`);
+            const staffEl = document.getElementById(`calc-staff-${row.id}`);
+            
+            if (hoursEl) {
+                hoursEl.textContent = rowHours.toLocaleString('tr-TR', { maximumFractionDigits: 1 });
+                const tr = hoursEl.closest('tr');
+                if (tr) {
+                    const badge = tr.querySelector('.badge');
+                    if (badge) badge.textContent = normValue.toFixed(4);
+                }
+            }
+            if (staffEl) {
+                staffEl.textContent = rowStaff.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            }
+        }
+
+        function addNewAreaRow() {
+            if (!currentSector) {
+                alert("Lütfen yeni alan eklemeden önce yukarıdan 'Sektör' seçimi yapınız.");
+                return;
+            }
+            saveHistory();
+            const newId = areaRows.length > 0 ? Math.max(...areaRows.map(r => r.id)) + 1 : 1;
+            const defFacDay = parseFloat(document.getElementById('facilityDays').value) || 30;
+            areaRows.push({ id: newId, type: "Günlük", zone: "", name: "", quantity: 1, area: 0, code: Object.keys(dailyNorms[currentSector])[0] || "", shift: "1", dailyFreq: 1, frequency: defFacDay });
+            renderAreaRows();
+            const container = document.querySelector('.table-container');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function cloneAreaRow(id) {
+            saveHistory();
+            const rowToClone = areaRows.find(r => r.id === id);
+            if(rowToClone) {
+                const newId = areaRows.length > 0 ? Math.max(...areaRows.map(r => r.id)) + 1 : 1;
+                const newRow = JSON.parse(JSON.stringify(rowToClone));
+                newRow.id = newId;
+                areaRows.push(newRow);
+                renderAreaRows();
+            }
+        }
+
+        function deleteAreaRow(id) {
+            saveHistory();
+            areaRows = areaRows.filter(r => r.id !== id);
+            renderAreaRows();
+        }
+
+        let globalTotals = { area: 0, hours: 0, baseStaff: 0, normStaff: 0, extraStaff: 0, grandTotalStaff: 0, groupDailyHours: 0, groupProjHours: 0, groupDailyStaff: 0, groupProjStaff: 0, groupDailyArea: 0, groupProjArea: 0, shift1Staff: 0, shift2Staff: 0, shift3Staff: 0 };
+        let shiftChartInstance = null;
+        let typeChartInstance = null;
+
+        function updateCharts(v1, v2, v3, manager, chief, fixed, dailyHours, projHours) {
+            try {
+                const shiftCanvas = document.getElementById('shiftChart');
+                const typeCanvas = document.getElementById('typeChart');
+                
+                if(!shiftCanvas || !typeCanvas) return;
+                
+                const shiftCtx = shiftCanvas.getContext('2d');
+                const typeCtx = typeCanvas.getContext('2d');
+
+                if(shiftChartInstance) shiftChartInstance.destroy();
+                if(typeChartInstance) typeChartInstance.destroy();
+
+                shiftChartInstance = new Chart(shiftCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['1. Vardiya', '2. Vardiya', '3. Vardiya', 'İdari/Sabit Kadro'],
+                        datasets: [{
+                            data: [v1.toFixed(1), v2.toFixed(1), v3.toFixed(1), (manager+chief+fixed).toFixed(1)],
+                            backgroundColor: ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b'],
+                            borderWidth: 0,
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'right', labels: { font: { family: "'Segoe UI', sans-serif", size: 12 } } }
+                        },
+                        cutout: '65%'
+                    }
+                });
+
+                typeChartInstance = new Chart(typeCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Günlük İşler (Rutin)', 'Proje İşleri (Detay)'],
+                        datasets: [{
+                            label: 'Aylık Toplam Efor (Saat)',
+                            data: [dailyHours.toFixed(0), projHours.toFixed(0)],
+                            backgroundColor: ['#3b82f6', '#10b981'],
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: { beginAtZero: true, grid: { color: '#e2e8f0' } },
+                            x: { grid: { display: false } }
+                        }
+                    }
+                });
+            } catch(e) {
+                console.warn("Chart rendering skipped.", e);
+            }
+        }
+
+        function updateAllMetrics() {
+            const staffDays = parseFloat(document.getElementById('staffDays').value) || 26;
+            const dailyHours = parseFloat(document.getElementById('dailyHours').value) || 7.5;
+            const reliefBuffer = parseFloat(document.getElementById('reliefBuffer').value) || 16.67;
+            let perfRate = parseFloat(document.getElementById('performanceRate').value) || 100;
+            if (perfRate < 10) { perfRate = 10; document.getElementById('performanceRate').value = 10; }
+            const perfMultiplier = perfRate / 100;
+
+            globalTotals = { area: 0, hours: 0, baseStaff: 0, normStaff: 0, extraStaff: 0, grandTotalStaff: 0, groupDailyHours: 0, groupProjHours: 0, groupDailyStaff: 0, groupProjStaff: 0, groupDailyArea: 0, groupProjArea: 0, shift1Staff: 0, shift2Staff: 0, shift3Staff: 0 };
+
+            areaRows.forEach(row => {
+                let normValue = 0;
+                if (row.type === 'Günlük' && dailyNorms[currentSector] && dailyNorms[currentSector][row.code]) normValue = dailyNorms[currentSector][row.code].val;
+                if (row.type === 'Proje' && projectNorms[row.code]) normValue = projectNorms[row.code].val;
+
+                const f1 = parseFloat(row.freqS1) || 0;
+                const f2 = parseFloat(row.freqS2) || 0;
+                const f3 = parseFloat(row.freqS3) || 0;
+                let dailyF = f1 + f2 + f3;
+                if (dailyF === 0 && row.type === 'Proje') dailyF = 1;
+
+                const qty = row.quantity || 1;
+                const rowTotalArea = row.area * qty;
+                
+                let rowHours = ((rowTotalArea * normValue * dailyF * row.frequency) / 60) / perfMultiplier;
+                let rowStaff = rowHours / (staffDays * dailyHours);
+                row._calcHours = rowHours;
+                row._calcStaff = rowStaff;
+                let rowNormStaff = rowStaff * (1 + (reliefBuffer / 100));
+                
+                // Distribute staff proportionally among shifts based on frequency
+                if (dailyF > 0) {
+                    globalTotals.shift1Staff += rowNormStaff * (f1 / dailyF);
+                    globalTotals.shift2Staff += rowNormStaff * (f2 / dailyF);
+                    globalTotals.shift3Staff += rowNormStaff * (f3 / dailyF);
+                } else {
+                    // Fallback to shift 1
+                    globalTotals.shift1Staff += rowNormStaff;
+                }
+
+                globalTotals.area += rowTotalArea;
+                globalTotals.hours += rowHours;
+                globalTotals.baseStaff += rowStaff;
+
+                if(row.type === 'Günlük') {
+                    globalTotals.groupDailyArea += rowTotalArea;
+                    globalTotals.groupDailyHours += rowHours;
+                    globalTotals.groupDailyStaff += rowStaff;
+                } else {
+                    globalTotals.groupProjArea += rowTotalArea;
+                    globalTotals.groupProjHours += rowHours;
+                    globalTotals.groupProjStaff += rowStaff;
+                }
+
+                const elHours = document.getElementById(`calc-hours-${row.id}`);
+                const elStaff = document.getElementById(`calc-staff-${row.id}`);
+                if (elHours) elHours.textContent = rowHours.toLocaleString('tr-TR', { maximumFractionDigits: 1 });
+                if (elStaff) elStaff.textContent = rowStaff.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            });
+
+            globalTotals.normStaff = globalTotals.baseStaff * (1 + (reliefBuffer / 100));
+
+            let manager = parseFloat(document.getElementById('managerStaff').value) || 0;
+            let chief = parseFloat(document.getElementById('chiefStaff').value) || 0;
+            let machine = parseFloat(document.getElementById('machineStaff').value) || 0;
+            let glass = parseFloat(document.getElementById('glassStaff').value) || 0;
+            
+            globalTotals.extraStaff = manager + chief + machine + glass;
+            globalTotals.grandTotalStaff = globalTotals.normStaff + globalTotals.extraStaff;
+
+            autoSaveLocal();
+
+            if(document.getElementById('dashboard').classList.contains('active')) {
+                updateDashboardView();
+            }
+            updateSubtotals();
+        }
+
+        function updateDashboardView() {
+            document.getElementById('kpiTotalArea').innerHTML = `${globalTotals.area.toLocaleString('tr-TR')}`;
+            document.getElementById('kpiTotalHours').innerHTML = `${globalTotals.hours.toLocaleString('tr-TR', { maximumFractionDigits: 0 })}`;
+            document.getElementById('kpiBaseNorm').innerHTML = `${globalTotals.baseStaff.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            let reliefStaff = globalTotals.normStaff - globalTotals.baseStaff;
+            document.getElementById('kpiReliefStaff').innerHTML = `${reliefStaff.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            document.getElementById('kpiGrandTotal').innerHTML = `${globalTotals.grandTotalStaff.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+            document.getElementById('dashProjName').textContent = document.getElementById('projectName').value;
+            document.getElementById('dashSector').textContent = currentSector;
+
+            const v1Staff = globalTotals.shift1Staff || 0;
+            const v2Staff = globalTotals.shift2Staff || 0;
+            const v3Staff = globalTotals.shift3Staff || 0;
+            
+            const totalShiftStaff = v1Staff + v2Staff + v3Staff;
+            const totalForPercent = totalShiftStaff > 0 ? totalShiftStaff : 1;
+            const v1Percent = ((v1Staff / totalForPercent) * 100).toFixed(1);
+            const v2Percent = ((v2Staff / totalForPercent) * 100).toFixed(1);
+            const v3Percent = ((v3Staff / totalForPercent) * 100).toFixed(1);
+            
+            const manager = parseFloat(document.getElementById('managerStaff').value) || 0;
+            const chief = parseFloat(document.getElementById('chiefStaff').value) || 0;
+            const machine = parseFloat(document.getElementById('machineStaff').value) || 0;
+            const glass = parseFloat(document.getElementById('glassStaff').value) || 0;
+            
+            updateCharts(v1Staff, v2Staff, v3Staff, manager, chief, machine + glass, globalTotals.groupDailyHours, globalTotals.groupProjHours);
+
+            document.getElementById('shiftTableBody').innerHTML = `
+                <tr>
+                    <td><strong>1. Vardiya</strong><br><span style="font-size:0.75rem; color:var(--text-muted);">Gündüz</span></td>
+                    <td>
+                        <div style="font-weight:700; font-size:0.8rem; color:#3b82f6;">%${v1Percent}</div>
+                        <div class="progress-bg"><div class="progress-bar pb-1" style="width: ${v1Percent}%;"></div></div>
+                    </td>
+                    <td style="text-align:right; font-weight:800; font-size:1.1rem; color:#3b82f6;">${v1Staff.toLocaleString('tr-TR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</td>
+                </tr>
+                <tr>
+                    <td><strong>2. Vardiya</strong><br><span style="font-size:0.75rem; color:var(--text-muted);">Akşam</span></td>
+                    <td>
+                        <div style="font-weight:700; font-size:0.8rem; color:#8b5cf6;">%${v2Percent}</div>
+                        <div class="progress-bg"><div class="progress-bar pb-2" style="width: ${v2Percent}%;"></div></div>
+                    </td>
+                    <td style="text-align:right; font-weight:800; font-size:1.1rem; color:#8b5cf6;">${v2Staff.toLocaleString('tr-TR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</td>
+                </tr>
+                <tr>
+                    <td><strong>3. Vardiya</strong><br><span style="font-size:0.75rem; color:var(--text-muted);">Gece</span></td>
+                    <td>
+                        <div style="font-weight:700; font-size:0.8rem; color:#10b981;">%${v3Percent}</div>
+                        <div class="progress-bg"><div class="progress-bar pb-3" style="width: ${v3Percent}%;"></div></div>
+                    </td>
+                    <td style="text-align:right; font-weight:800; font-size:1.1rem; color:#10b981;">${v3Staff.toLocaleString('tr-TR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</td>
+                </tr>
+            `;
+
+            document.getElementById('summaryTableBody').innerHTML = `
+                <tr>
+                    <td><span class="badge" style="background:#e0f2fe; color:#0369a1;">Günlük (Rutin)</span></td>
+                    <td style="text-align:right; font-weight:500;">${globalTotals.groupDailyArea.toLocaleString('tr-TR')} m²</td>
+                    <td style="text-align:right; font-weight:500;">${globalTotals.groupDailyHours.toLocaleString('tr-TR', { maximumFractionDigits: 0 })} sa</td>
+                    <td style="text-align:right; font-weight:800; color:var(--accent);">${globalTotals.groupDailyStaff.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                </tr>
+                <tr>
+                    <td><span class="badge" style="background:#fef3c7; color:#d97706;">Proje (Detay)</span></td>
+                    <td style="text-align:right; font-weight:500;">${globalTotals.groupProjArea.toLocaleString('tr-TR')} m²</td>
+                    <td style="text-align:right; font-weight:500;">${globalTotals.groupProjHours.toLocaleString('tr-TR', { maximumFractionDigits: 0 })} sa</td>
+                    <td style="text-align:right; font-weight:800; color:var(--warning);">${globalTotals.groupProjStaff.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                </tr>
+            `;
+        }
+
+        // NORM DB İŞLEMLERİ
+        function initNormDb() {
+            const dbFilter = document.getElementById('dbSectorFilter');
+            dbFilter.innerHTML = '';
+            
+            let firstSector = null;
+            for (let sector in dailyNorms) {
+                if(!firstSector) firstSector = sector;
+                const opt = document.createElement('option');
+                opt.value = sector;
+                opt.textContent = "Sektör: " + sector;
+                dbFilter.appendChild(opt);
+            }
+            
+            const projOpt = document.createElement('option');
+            projOpt.value = 'Proje';
+            projOpt.textContent = "Kategori: Proje İşleri (Tümü)";
+            dbFilter.appendChild(projOpt);
+            
+            let sectorExists = Object.keys(dailyNorms).includes(currentSector);
+            let targetVal = sectorExists ? currentSector : firstSector;
+            dbFilter.value = targetVal;
+            
+            Array.from(dbFilter.options).forEach(opt => {
+                if(opt.value === targetVal) opt.selected = true;
+            });
+            
+            renderNormTable();
+        }
+
+        function renderNormTable() {
+            try {
+                const filter = document.getElementById('dbSectorFilter').value;
+                const tbody = document.getElementById('normTableBody');
+                if(!tbody) return;
+                
+                let htmlBuffer = '';
+
+                if (filter === 'Proje') {
+                    const norms = projectNorms || {};
+                    for (let code in norms) {
+                        htmlBuffer += `
+                            <tr>
+                                <td><span class="badge" style="background:#fef3c7; color:#d97706;">Proje İşi</span></td>
+                                <td><strong>${code}</strong></td>
+                                <td>${norms[code].name}</td>
+                                <td style="text-align:right;">
+                                    <input type="number" step="0.0001" class="tbl-input num" style="width:120px;" value="${norms[code].val}" onchange="updateMasterNorm('Proje', '${code}', this.value)">
+                                </td>
+                            </tr>
+                        `;
+                    }
+                } else {
+                    const rooms = (dailyNorms && dailyNorms[filter]) ? dailyNorms[filter] : {};
+                    for (let code in rooms) {
+                        htmlBuffer += `
+                            <tr>
+                                <td><span class="badge">${filter}</span></td>
+                                <td><strong>${code}</strong></td>
+                                <td>${rooms[code].name}</td>
+                                <td style="text-align:right;">
+                                    <input type="number" step="0.0001" class="tbl-input num" style="width:120px;" value="${rooms[code].val}" onchange="updateMasterNorm('Günlük', '${code}', this.value, '${filter}')">
+                                </td>
+                            </tr>
+                        `;
+                    }
+                }
+                
+                tbody.innerHTML = htmlBuffer;
+            } catch(e) {
+                console.error("renderNormTable crash:", e);
+            }
+        }
+
+        function updateMasterNorm(type, code, val, sector='') {
+            const numVal = parseFloat(val) || 0;
+            if (type === 'Proje') {
+                projectNorms[code].val = numVal;
+            } else {
+                dailyNorms[sector][code].val = numVal;
+            }
+            renderAreaRows(); 
+        }
+
+        function addNewNormCode() {
+            const filter = document.getElementById('dbSectorFilter').value;
+            const isProject = (filter === 'Proje');
+            
+            const code = prompt("Oda veya Metot Kodunu Girin (Örn: YENIOFIS):");
+            if(!code || code.trim() === "") return;
+            
+            const name = prompt("Açıklamayı Girin:");
+            if(!name || name.trim() === "") return;
+            
+            const val = parseFloat(prompt("Zaman Normu Değerini Girin (dk/m2):"));
+            if(isNaN(val)) return;
+
+            if(isProject) {
+                projectNorms[code.toUpperCase()] = { name: name, val: val };
+            } else {
+                if(!dailyNorms[filter]) dailyNorms[filter] = {};
+                dailyNorms[filter][code.toUpperCase()] = { name: name, val: val };
+            }
+            showToast("Yeni kod başarıyla eklendi.");
+            renderNormTable();
+        }
+
+        function resetDefaultNorms() {
+            if(confirm("Tüm norm verileri orijinal ayarlarına döndürülecektir. Emin misiniz?")) {
+                dailyNorms = JSON.parse(JSON.stringify(originalDailyNorms));
+                projectNorms = JSON.parse(JSON.stringify(originalProjectNorms));
+                renderNormTable();
+                renderAreaRows();
+                showToast("Normlar varsayılana sıfırlandı.");
+            }
+        }
+
+        function clearAllData() {
+            if(confirm("Tüm veri tablosu silinecek! Onaylıyor musunuz?")) {
+                historyStack = [];
+                redoStack = [];
+                areaRows = [];
+                document.getElementById('projectName').value = "Yeni Tesis Projesi";
+                document.getElementById('managerStaff').value = 0;
+                document.getElementById('chiefStaff').value = 0;
+                document.getElementById('machineStaff').value = 0;
+                document.getElementById('glassStaff').value = 0;
+                
+                // New additions
+                document.getElementById('performanceRate').value = 100;
+                
+                const sectorSelect = document.getElementById('projectSector');
+                sectorSelect.value = "";
+                currentSector = "";
+                
+                // Clear the table and reset KPIs
+                renderAreaRows(); 
+                updateAllMetrics();
+                
+                showToast("Proje sıfırlandı.");
+            }
+        }
+
+        function exportData() {
+            const projectData = {
+                version: "41.0",
+                projectName: document.getElementById('projectName').value,
+                currentSector: currentSector,
+                facilityDays: document.getElementById('facilityDays').value,
+                staffDays: document.getElementById('staffDays').value,
+                dailyHours: document.getElementById('dailyHours').value,
+                reliefBuffer: document.getElementById('reliefBuffer').value,
+                performanceRate: document.getElementById('performanceRate').value,
+                managerStaff: document.getElementById('managerStaff').value,
+                chiefStaff: document.getElementById('chiefStaff').value,
+                machineStaff: document.getElementById('machineStaff').value,
+                glassStaff: document.getElementById('glassStaff').value,
+                areaRows: areaRows,
+                dailyNorms: dailyNorms,
+                projectNorms: projectNorms
+            };
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(projectData, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `${document.getElementById('projectName').value.replace(/\s+/g, '_')}_is_gucu_analiz.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function autoSaveLocal() {
+            const dataToSave = {
+                version: "41.0",
+                projectName: document.getElementById('projectName').value,
+                currentSector: currentSector,
+                facilityDays: document.getElementById('facilityDays').value,
+                staffDays: document.getElementById('staffDays').value,
+                dailyHours: document.getElementById('dailyHours').value,
+                reliefBuffer: document.getElementById('reliefBuffer').value,
+                performanceRate: document.getElementById('performanceRate').value,
+                managerStaff: document.getElementById('managerStaff').value,
+                chiefStaff: document.getElementById('chiefStaff').value,
+                machineStaff: document.getElementById('machineStaff').value,
+                glassStaff: document.getElementById('glassStaff').value,
+                areaRows: areaRows,
+                dailyNorms: dailyNorms,
+                projectNorms: projectNorms
+            };
+            localStorage.setItem("tm_auto_save", JSON.stringify(dataToSave));
+        }
+
+        function loadLocalData() {
+            try {
+                const saved = localStorage.getItem("tm_auto_save");
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    if (parsed.projectName) document.getElementById('projectName').value = parsed.projectName;
+                    if (parsed.facilityDays) document.getElementById('facilityDays').value = parsed.facilityDays;
+                    if (parsed.staffDays) document.getElementById('staffDays').value = parsed.staffDays;
+                    if (parsed.dailyHours) document.getElementById('dailyHours').value = parsed.dailyHours;
+                    if (parsed.reliefBuffer) document.getElementById('reliefBuffer').value = parsed.reliefBuffer;
+                    if (parsed.performanceRate) document.getElementById('performanceRate').value = parsed.performanceRate;
+                    if (parsed.managerStaff !== undefined) document.getElementById('managerStaff').value = parsed.managerStaff;
+                    if (parsed.chiefStaff !== undefined) document.getElementById('chiefStaff').value = parsed.chiefStaff;
+                    if (parsed.machineStaff !== undefined) document.getElementById('machineStaff').value = parsed.machineStaff;
+                    if (parsed.glassStaff !== undefined) document.getElementById('glassStaff').value = parsed.glassStaff;
+                    if (parsed.fixedStaff !== undefined && parsed.machineStaff === undefined) document.getElementById('machineStaff').value = parsed.fixedStaff;
+                    if (parsed.currentSector) currentSector = parsed.currentSector;
+                    if (parsed.areaRows) {
+                        areaRows = parsed.areaRows.map(r => {
+                            if(r.dailyFreq === undefined) r.dailyFreq = 1;
+                            if(r.quantity === undefined) r.quantity = 1;
+                            if(r.zone === undefined) r.zone = "Genel";
+                            return r;
+                        });
+                    }
+                    
+                    // Auto-Heal: Her zaman orijinal normlarla başlat, üzerine kullanıcınınkini yaz
+                    dailyNorms = JSON.parse(JSON.stringify(originalDailyNorms));
+                    projectNorms = JSON.parse(JSON.stringify(originalProjectNorms));
+                    
+                    if (parsed.dailyNorms) {
+                        for (let sector in parsed.dailyNorms) {
+                            if (!dailyNorms[sector]) dailyNorms[sector] = {};
+                            for (let code in parsed.dailyNorms[sector]) {
+                                if(parsed.dailyNorms[sector][code] && parsed.dailyNorms[sector][code].name !== undefined) {
+                                    dailyNorms[sector][code] = parsed.dailyNorms[sector][code];
+                                }
+                            }
+                        }
+                    }
+                    if (parsed.projectNorms) {
+                        for (let code in parsed.projectNorms) {
+                            if(parsed.projectNorms[code] && parsed.projectNorms[code].name !== undefined) {
+                                projectNorms[code] = parsed.projectNorms[code];
+                            }
+                        }
+                    }
+                    return true;
+                }
+            } catch (e) { console.error("Local load failed"); }
+            return false;
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const fileName = file.name.toLowerCase();
+            
+            if (fileName.endsWith('.json')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const parsed = JSON.parse(e.target.result);
+                        if (parsed.projectName) document.getElementById('projectName').value = parsed.projectName;
+                        if (parsed.facilityDays) document.getElementById('facilityDays').value = parsed.facilityDays;
+                        if (parsed.staffDays) document.getElementById('staffDays').value = parsed.staffDays;
+                        if (parsed.dailyHours) document.getElementById('dailyHours').value = parsed.dailyHours;
+                        if (parsed.reliefBuffer) document.getElementById('reliefBuffer').value = parsed.reliefBuffer;
+                        if (parsed.performanceRate) document.getElementById('performanceRate').value = parsed.performanceRate;
+                        if (parsed.managerStaff !== undefined) document.getElementById('managerStaff').value = parsed.managerStaff;
+                        if (parsed.chiefStaff !== undefined) document.getElementById('chiefStaff').value = parsed.chiefStaff;
+                        if (parsed.machineStaff !== undefined) document.getElementById('machineStaff').value = parsed.machineStaff;
+                        if (parsed.glassStaff !== undefined) document.getElementById('glassStaff').value = parsed.glassStaff;
+                        if (parsed.fixedStaff !== undefined && parsed.machineStaff === undefined) document.getElementById('machineStaff').value = parsed.fixedStaff;
+                        if (parsed.currentSector) currentSector = parsed.currentSector;
+                        if (parsed.areaRows) {
+                            areaRows = parsed.areaRows.map(r => {
+                                if(r.dailyFreq === undefined) r.dailyFreq = 1;
+                                if(r.quantity === undefined) r.quantity = 1;
+                                if(r.zone === undefined) r.zone = "Genel";
+                                if(r.shift === undefined) r.shift = "1";
+                                return r;
+                            });
+                        }
+                        
+                        // Auto-Heal: Her zaman orijinal normlarla başlat, üzerine kullanıcınınkini yaz
+                        dailyNorms = JSON.parse(JSON.stringify(originalDailyNorms));
+                        projectNorms = JSON.parse(JSON.stringify(originalProjectNorms));
+                        
+                        if (parsed.dailyNorms) {
+                            for (let sector in parsed.dailyNorms) {
+                                if (!dailyNorms[sector]) dailyNorms[sector] = {};
+                                for (let code in parsed.dailyNorms[sector]) {
+                                    if(parsed.dailyNorms[sector][code] && parsed.dailyNorms[sector][code].name !== undefined) {
+                                        dailyNorms[sector][code] = parsed.dailyNorms[sector][code];
+                                    }
+                                }
+                            }
+                        }
+                        if (parsed.projectNorms) {
+                            for (let code in parsed.projectNorms) {
+                                if(parsed.projectNorms[code] && parsed.projectNorms[code].name !== undefined) {
+                                    projectNorms[code] = parsed.projectNorms[code];
+                                }
+                            }
+                        }
+                        
+                        saveHistory();
+                        initApp();
+                        alert("JSON verileri başarıyla yüklendi.");
+                    } catch (err) {
+                        alert("Hatalı JSON dosya formatı.");
+                    }
+                };
+                reader.readAsText(file);
+            } else if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls') || fileName.endsWith('.csv')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, {type: 'array'});
+                        const firstSheetName = workbook.SheetNames[0];
+                        const worksheet = workbook.Sheets[firstSheetName];
+                        const jsonArr = XLSX.utils.sheet_to_json(worksheet);
+                        
+                        if (jsonArr.length > 0) {
+                            saveHistory();
+                            areaRows = [];
+                            jsonArr.forEach((row, index) => {
+                                areaRows.push({
+                                    id: index + 1,
+                                    type: row['İş Tipi'] || 'Günlük',
+                                    zone: row['Kat / Bölge (Zon)'] || 'Genel',
+                                    name: row['Mahal Adı'] || row['Alan Adı / Açıklaması'] || row['Alan Açıklaması'] || '',
+                                    code: (row['Oda Kodu / Metot'] || '').toString().replace(/\[(.*?)\] .*/, '$1').trim(),
+                                    quantity: parseFloat(row['Adet']) || 1,
+                                    area: parseFloat(row['Metraj (m²)'] || row['Metraj']) || 0,
+                                    freqS1: parseFloat(row['1. Vardiya Frekansı'] || row['1. Var']) || (String(row['Vardiya']).includes('1') ? (parseFloat(row['Günlük Frekans']) || 1) : 0),
+                                    freqS2: parseFloat(row['2. Vardiya Frekansı'] || row['2. Var']) || (String(row['Vardiya']).includes('2') ? (parseFloat(row['Günlük Frekans']) || 1) : 0),
+                                    freqS3: parseFloat(row['3. Vardiya Frekansı'] || row['3. Var']) || (String(row['Vardiya']).includes('3') ? (parseFloat(row['Günlük Frekans']) || 1) : 0),
+                                    
+                                    frequency: parseFloat(row['Aylık Frekans']) || 30
+                                });
+                            });
+                            
+                            let pName = file.name.replace(/\.[^/.]+$/, "");
+                            document.getElementById('projectName').value = pName;
+                            
+                            initApp();
+                            alert("Excel verileri tabloya başarıyla aktarıldı. Proje adı dosya ismiyle güncellendi.");
+                        } else {
+                            alert("Excel dosyası boş veya formatı desteklenmiyor.");
+                        }
+                    } catch(err) {
+                        alert("Excel okunurken hata oluştu: " + err.message);
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            } else {
+                alert("Lütfen geçerli bir .json, .xlsx veya .csv dosyası yükleyin.");
+            }
+            event.target.value = '';
+        }
+
+        window.onload = function() {
+            if (!loadLocalData()) {
+                initApp();
+            } else {
+                initApp();
+            }
+            updateDashboardView();
+        };
+    
+        
+        function updateSubtotals() {
+            const tbody = document.getElementById('areaTableBody');
+            if(!tbody) return;
+            const trs = tbody.getElementsByTagName('tr');
+            
+            let sumQty = 0;
+            let sumArea = 0;
+            let sumHours = 0;
+            let sumStaff = 0;
+
+            for (let i = 0; i < trs.length; i++) {
+                const tr = trs[i];
+                if (tr.style.display !== "none") {
+                    const rowId = parseInt(tr.getAttribute('data-id'));
+                    const rowObj = areaRows.find(r => r.id === rowId);
+                    if (rowObj) {
+                        sumQty += (parseFloat(rowObj.quantity) || 0);
+                        sumArea += (parseFloat(rowObj.area) || 0);
+                        sumHours += (rowObj._calcHours || 0);
+                        sumStaff += (rowObj._calcStaff || 0);
+                    }
+                }
+            }
+
+            const elQty = document.getElementById('subtotQty');
+            const elArea = document.getElementById('subtotArea');
+            const elHours = document.getElementById('subtotHours');
+            const elStaff = document.getElementById('subtotStaff');
+
+            if(elQty) elQty.textContent = sumQty.toLocaleString('tr-TR');
+            if(elArea) elArea.textContent = sumArea.toLocaleString('tr-TR') + " m²";
+            if(elHours) elHours.textContent = sumHours.toLocaleString('tr-TR', { maximumFractionDigits: 1 });
+            if(elStaff) elStaff.textContent = sumStaff.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function filterDataEntry() {
+            const fType = document.getElementById('fltType').value.toLowerCase();
+            const fZone = document.getElementById('fltZone').value.toLowerCase();
+            const fDesc = document.getElementById('fltDesc').value.toLowerCase();
+            const fCode = document.getElementById('fltCode').value.toLowerCase();
+
+            const tbody = document.getElementById('areaTableBody');
+            const trs = tbody.getElementsByTagName('tr');
+
+            for (let i = 0; i < trs.length; i++) {
+                const tr = trs[i];
+                
+                // Get elements inside the row
+                const typeEl = tr.cells[0].querySelector('select');
+                const zoneEl = tr.cells[1].querySelector('input');
+                const descEl = tr.cells[2].querySelector('input');
+                const codeEl = tr.cells[3].querySelector('select');
+
+                const vType = typeEl ? typeEl.value.toLowerCase() : '';
+                const vZone = zoneEl ? zoneEl.value.toLowerCase() : '';
+                const vDesc = descEl ? descEl.value.toLowerCase() : '';
+                
+                let vCode = '';
+                if (codeEl && codeEl.options.length > 0) {
+                     vCode = codeEl.options[codeEl.selectedIndex].text.toLowerCase();
+                }
+
+                if (vType.includes(fType) && vZone.includes(fZone) && vDesc.includes(fDesc) && vCode.includes(fCode)) {
+                    tr.style.display = "";
+                } else {
+                    tr.style.display = "none";
+                }
+            }
+            updateSubtotals();
+        }
+</script>
+</body>
+</html>
