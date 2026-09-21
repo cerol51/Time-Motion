@@ -632,6 +632,38 @@
                         <button class="btn btn-primary btn-sm" onclick="addNewAreaRow()">+ Yeni Alan / Görev Ekle</button>
                     </div>
                 </div>
+                <!-- Toplu Değer Güncelleme Çubuğu (Bulk Edit Bar) -->
+                <div id="bulkEditBar" style="background: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%); border-bottom: 1px solid #cbd5e1; padding: 0.75rem 1.25rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="font-size: 1rem;">⚡</span>
+                        <span style="font-weight: 700; font-size: 0.85rem; color: var(--primary);">Toplu Değer Güncelleme:</span>
+                        <span id="bulkTargetCount" class="badge" style="background: #3b82f6; color: #fff; font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 9999px;">Tüm Liste: 0 satır</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;">
+                        <div style="display: flex; align-items: center; gap: 0.3rem;">
+                            <label for="bulkFreqS1" style="font-size: 0.78rem; font-weight: 600; color: #1e40af;">1.Var:</label>
+                            <input type="number" id="bulkFreqS1" step="0.5" min="0" placeholder="-" class="tbl-input num" style="width: 58px; padding: 0.2rem 0.35rem; font-size: 0.82rem; background: #fff; border: 1px solid #93c5fd; border-radius: 4px; font-weight: 600; color: #1e40af;" onkeydown="if(event.key==='Enter') applyBulkChanges()">
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.3rem;">
+                            <label for="bulkFreqS2" style="font-size: 0.78rem; font-weight: 600; color: #6b21a8;">2.Var:</label>
+                            <input type="number" id="bulkFreqS2" step="0.5" min="0" placeholder="-" class="tbl-input num" style="width: 58px; padding: 0.2rem 0.35rem; font-size: 0.82rem; background: #fff; border: 1px solid #c084fc; border-radius: 4px; font-weight: 600; color: #6b21a8;" onkeydown="if(event.key==='Enter') applyBulkChanges()">
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.3rem;">
+                            <label for="bulkFreqS3" style="font-size: 0.78rem; font-weight: 600; color: #065f46;">3.Var:</label>
+                            <input type="number" id="bulkFreqS3" step="0.5" min="0" placeholder="-" class="tbl-input num" style="width: 58px; padding: 0.2rem 0.35rem; font-size: 0.82rem; background: #fff; border: 1px solid #6ee7b7; border-radius: 4px; font-weight: 600; color: #065f46;" onkeydown="if(event.key==='Enter') applyBulkChanges()">
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.3rem;">
+                            <label for="bulkFrequency" style="font-size: 0.78rem; font-weight: 600; color: #374151;">Aylık Frek:</label>
+                            <input type="number" id="bulkFrequency" step="0.5" min="0" placeholder="-" class="tbl-input num" style="width: 64px; padding: 0.2rem 0.35rem; font-size: 0.82rem; background: #fff; border: 1px solid #cbd5e1; border-radius: 4px; font-weight: 600; color: #111827;" onkeydown="if(event.key==='Enter') applyBulkChanges()">
+                        </div>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="applyBulkChanges()" style="padding: 0.3rem 0.8rem; font-size: 0.82rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.35rem; background: #059669; border-color: #059669;" title="Sadece doldurulan alanlar filtrelenen/görünen tüm satırlara uygulanır">
+                            <span>✓ Filtrelenenlere Uygula</span>
+                        </button>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="resetBulkInputs()" style="padding: 0.3rem 0.55rem; font-size: 0.82rem;" title="Toplu giriş kutularını temizle">
+                            <span>✕</span>
+                        </button>
+                    </div>
+                </div>
                 <div class="table-container" style="max-height: 600px; overflow-y:auto; overflow-x:auto; padding:0.5rem;">
                     <table>
                         <thead>
@@ -657,7 +689,9 @@
                                 <th style="padding: 0.2rem;"><input type="text" id="fltZone" onkeyup="filterDataEntry()" placeholder="Ara..." class="tbl-input" style="font-size:0.7rem; padding:0.2rem;"></th>
                                 <th style="padding: 0.2rem;"><input type="text" id="fltDesc" onkeyup="filterDataEntry()" placeholder="Ara..." class="tbl-input" style="font-size:0.7rem; padding:0.2rem;"></th>
                                 <th style="padding: 0.2rem;"><input type="text" id="fltCode" onkeyup="filterDataEntry()" placeholder="Ara..." class="tbl-input" style="font-size:0.7rem; padding:0.2rem;"></th>
-                                <th colspan="10" style="padding: 0.2rem;"></th>
+                                <th colspan="10" style="padding: 0.2rem 0.5rem; text-align: right; vertical-align: middle;">
+                                    <button type="button" onclick="clearFilters()" class="btn btn-secondary btn-sm" style="padding: 0.15rem 0.5rem; font-size: 0.72rem; line-height: 1.2;" title="Tüm filtreleri temizle">Filtreleri Temizle ✕</button>
+                                </th>
                             </tr>
                         </thead>
                         <tbody id="areaTableBody">
@@ -1042,6 +1076,7 @@
             }
 
             updateAllMetrics();
+            if (typeof updateBulkTargetCount === 'function') updateBulkTargetCount();
         }
 
         function updateRow(id, field, value, skipRender=false) {
@@ -2239,6 +2274,138 @@
                 }
             }
             updateSubtotals();
+            updateBulkTargetCount();
+        }
+
+        function clearFilters() {
+            const f1 = document.getElementById('fltType');
+            const f2 = document.getElementById('fltZone');
+            const f3 = document.getElementById('fltDesc');
+            const f4 = document.getElementById('fltCode');
+            if (f1) f1.value = '';
+            if (f2) f2.value = '';
+            if (f3) f3.value = '';
+            if (f4) f4.value = '';
+            filterDataEntry();
+        }
+
+        function updateBulkTargetCount() {
+            const badge = document.getElementById('bulkTargetCount');
+            if (!badge) return;
+
+            const tbody = document.getElementById('areaTableBody');
+            if (!tbody) return;
+            const trs = tbody.getElementsByTagName('tr');
+            const total = trs.length;
+
+            let visible = 0;
+            for (let i = 0; i < total; i++) {
+                if (trs[i].style.display !== 'none') {
+                    visible++;
+                }
+            }
+
+            if (total === 0) {
+                badge.style.background = '#64748b';
+                badge.textContent = '0 satır';
+            } else if (visible === total) {
+                badge.style.background = '#3b82f6';
+                badge.textContent = `Tüm Liste: ${total} satır`;
+            } else {
+                badge.style.background = '#f59e0b';
+                badge.textContent = `🔍 Filtrelenen: ${visible} / ${total} satır`;
+            }
+        }
+
+        function resetBulkInputs() {
+            const b1 = document.getElementById('bulkFreqS1');
+            const b2 = document.getElementById('bulkFreqS2');
+            const b3 = document.getElementById('bulkFreqS3');
+            const bf = document.getElementById('bulkFrequency');
+            if (b1) b1.value = '';
+            if (b2) b2.value = '';
+            if (b3) b3.value = '';
+            if (bf) bf.value = '';
+        }
+
+        function applyBulkChanges() {
+            const s1Input = document.getElementById('bulkFreqS1');
+            const s2Input = document.getElementById('bulkFreqS2');
+            const s3Input = document.getElementById('bulkFreqS3');
+            const fInput = document.getElementById('bulkFrequency');
+
+            const s1Raw = s1Input ? s1Input.value.trim() : '';
+            const s2Raw = s2Input ? s2Input.value.trim() : '';
+            const s3Raw = s3Input ? s3Input.value.trim() : '';
+            const fRaw = fInput ? fInput.value.trim() : '';
+
+            if (s1Raw === '' && s2Raw === '' && s3Raw === '' && fRaw === '') {
+                alert('Lütfen toplu güncellemek istediğiniz en az bir vardiya veya aylık frekans değeri giriniz.');
+                return;
+            }
+
+            const tbody = document.getElementById('areaTableBody');
+            if (!tbody) return;
+            const trs = tbody.getElementsByTagName('tr');
+
+            let targetRows = [];
+            for (let i = 0; i < trs.length; i++) {
+                const tr = trs[i];
+                if (tr.style.display !== 'none') {
+                    const rowId = parseInt(tr.getAttribute('data-id'), 10);
+                    const rowObj = areaRows.find(r => r.id === rowId);
+                    if (rowObj) {
+                        targetRows.push({ tr, rowObj });
+                    }
+                }
+            }
+
+            if (targetRows.length === 0) {
+                alert('Değişiklik uygulanacak görünür satır bulunamadı.');
+                return;
+            }
+
+            saveHistory();
+
+            const changeDesc = [];
+            if (s1Raw !== '') changeDesc.push(`1.Vardiya: ${s1Raw}`);
+            if (s2Raw !== '') changeDesc.push(`2.Vardiya: ${s2Raw}`);
+            if (s3Raw !== '') changeDesc.push(`3.Vardiya: ${s3Raw}`);
+            if (fRaw !== '') changeDesc.push(`Aylık Frekans: ${fRaw}`);
+
+            targetRows.forEach(({ tr, rowObj }) => {
+                if (s1Raw !== '') {
+                    const val1 = Math.max(0, parseFloat(s1Raw) || 0);
+                    rowObj.freqS1 = val1;
+                    const inp = tr.cells[6]?.querySelector('input');
+                    if (inp) inp.value = val1;
+                }
+                if (s2Raw !== '') {
+                    const val2 = Math.max(0, parseFloat(s2Raw) || 0);
+                    rowObj.freqS2 = val2;
+                    const inp = tr.cells[7]?.querySelector('input');
+                    if (inp) inp.value = val2;
+                }
+                if (s3Raw !== '') {
+                    const val3 = Math.max(0, parseFloat(s3Raw) || 0);
+                    rowObj.freqS3 = val3;
+                    const inp = tr.cells[8]?.querySelector('input');
+                    if (inp) inp.value = val3;
+                }
+                if (fRaw !== '') {
+                    const valF = Math.max(0, parseFloat(fRaw) || 0);
+                    rowObj.frequency = valF;
+                    const inp = tr.cells[9]?.querySelector('input');
+                    if (inp) inp.value = valF;
+                }
+
+                updateSingleRowMetrics(rowObj);
+            });
+
+            updateAllMetrics();
+            updateSubtotals();
+
+            showToast(`${targetRows.length} satır toplu güncellendi (${changeDesc.join(', ')}).`);
         }
 </script>
 </body>
